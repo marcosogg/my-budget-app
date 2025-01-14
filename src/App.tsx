@@ -7,6 +7,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Transactions from "./pages/Transactions";
+import Upload from "./pages/Upload";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Transactions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/upload"
+                element={
+                  <ProtectedRoute>
+                    <Upload />
                   </ProtectedRoute>
                 }
               />
