@@ -55,7 +55,6 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
             <TableHead>Date</TableHead>
             <TableHead>Description</TableHead>
             <TableHead className="text-right">Amount</TableHead>
-            <TableHead className="text-right">Balance</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,9 +70,6 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
                     {formatAmount(Math.abs(transaction.amount), transaction.currency)}
                   </span>
                 </div>
-              </TableCell>
-              <TableCell className="text-right">
-                {formatAmount(transaction.balance, transaction.currency)}
               </TableCell>
             </TableRow>
           ))}
