@@ -92,6 +92,54 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          balance: number
+          completed_date: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          fee: number | null
+          id: string
+          product: string | null
+          started_date: string | null
+          state: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance: number
+          completed_date?: string | null
+          created_at?: string
+          currency: string
+          description?: string | null
+          fee?: number | null
+          id?: string
+          product?: string | null
+          started_date?: string | null
+          state?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance?: number
+          completed_date?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          fee?: number | null
+          id?: string
+          product?: string | null
+          started_date?: string | null
+          state?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

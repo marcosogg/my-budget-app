@@ -2,20 +2,89 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { parse } from 'papaparse';
+import { Transaction } from '@/types/transaction';
 
 interface FileUploadProps {
-  onFileUpload: (data: string) => void;
+  onFileUpload: (data: Transaction[]) => void;
 }
 
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
-        onFileUpload(text);
-        toast.success('File uploaded successfully!');
+        
+        // Parse CSV data
+        parse(text, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (header) => {
+            const headerMap: { [key: string]: string } = {
+              'Type': 'type',
+              'Product': 'product',
+              'Started Date': 'startedDate',
+              'Completed Date': 'completedDate',
+              'Description': 'description',
+              'Amount': 'amount',
+              'Fee': 'fee',
+              'Currency': 'currency',
+              'State': 'state',
+              'Balance': 'balance'
+            };
+            return headerMap[header] || header;
+          },
+          transform: (value, field) => {
+            if (field === 'amount' || field === 'fee' || field === 'balance') {
+              return parseFloat(value);
+            }
+            return value;
+          },
+          complete: async (results) => {
+            const transactions = results.data as Transaction[];
+            
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              
+              if (!user) {
+                toast.error('Please sign in to save transactions');
+                return;
+              }
+
+              // Save transactions to Supabase
+              const { error } = await supabase.from('transactions').insert(
+                transactions.map(t => ({
+                  user_id: user.id,
+                  type: t.type,
+                  product: t.product,
+                  started_date: t.startedDate,
+                  completed_date: t.completedDate,
+                  description: t.description,
+                  amount: t.amount,
+                  fee: t.fee,
+                  currency: t.currency,
+                  state: t.state,
+                  balance: t.balance
+                }))
+              );
+
+              if (error) {
+                console.error('Error saving transactions:', error);
+                toast.error('Failed to save transactions');
+                return;
+              }
+
+              onFileUpload(transactions);
+              toast.success('Transactions saved successfully!');
+            } catch (error) {
+              console.error('Error:', error);
+              toast.error('Failed to process file');
+            }
+          },
+        });
       };
       reader.readAsText(file);
     }
