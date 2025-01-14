@@ -6,39 +6,33 @@ import { Transaction } from '@/types/transaction';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const fetchTransactions = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('*')
-    .order('completed_date', { ascending: false });
-
-  if (error) throw error;
-
-  return data.map(t => ({
-    type: t.type,
-    product: t.product,
-    startedDate: t.started_date,
-    completedDate: t.completed_date,
-    description: t.description,
-    amount: t.amount,
-    fee: t.fee,
-    currency: t.currency,
-    state: t.state,
-    balance: t.balance
-  }));
-};
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: transactions = [], refetch } = useQuery({
     queryKey: ['transactions'],
-    queryFn: fetchTransactions,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('completed_date', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load transactions",
+        });
+        throw error;
+      }
+
+      return data as Transaction[];
+    },
   });
 
   const handleFileUpload = async (newTransactions: Transaction[]) => {
@@ -57,10 +51,16 @@ const Index = () => {
           <h1 className="text-4xl font-bold mb-2">Transaction Viewer</h1>
           <p className="text-gray-600">Upload your CSV file to view and analyze your transactions</p>
         </div>
-        <Button variant="outline" onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="outline" onClick={() => navigate('/transactions')}>
+            View All Transactions
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <FileUpload onFileUpload={handleFileUpload} />
@@ -68,6 +68,13 @@ const Index = () => {
       {transactions.length > 0 && (
         <div className="space-y-8">
           <TransactionStats transactions={transactions} />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Recent Transactions</h2>
+            <Button variant="link" onClick={() => navigate('/transactions')}>
+              View All
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
           <TransactionTable transactions={transactions} />
         </div>
       )}

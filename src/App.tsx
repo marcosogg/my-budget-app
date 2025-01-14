@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Transactions from "./pages/Transactions";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
                   </ProtectedRoute>
                 }
               />
