@@ -1,5 +1,5 @@
 import { Transaction } from '@/types/transaction';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import {
   Table,
   TableBody,
@@ -16,10 +16,14 @@ interface TransactionTableProps {
 
 const TransactionTable = ({ transactions }: TransactionTableProps) => {
   const formatDate = (dateStr: string) => {
-    const [datePart, timePart] = dateStr.split(' ');
-    const [day, month, year] = datePart.split('/');
-    const date = new Date(`${year}-${month}-${day}T${timePart}`);
-    return format(date, 'dd MMM yyyy HH:mm');
+    try {
+      // Parse the date string in the format "DD/MM/YYYY HH:mm"
+      const parsedDate = parse(dateStr, 'dd/MM/yyyy HH:mm', new Date());
+      return format(parsedDate, 'dd MMM yyyy HH:mm');
+    } catch (error) {
+      console.error('Error parsing date:', dateStr, error);
+      return dateStr; // Return original string if parsing fails
+    }
   };
 
   const formatAmount = (amount: number, currency: string) => {
