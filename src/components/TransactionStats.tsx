@@ -1,7 +1,7 @@
 import { Transaction } from '@/types/transaction';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowDown, ArrowUp, Calendar } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
@@ -29,8 +29,8 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
 
   const formatDate = (dateStr: string) => {
     try {
-      const parsedDate = parse(dateStr, 'dd/MM/yyyy HH:mm', new Date());
-      return format(parsedDate, 'dd/MM/yyyy');
+      const date = new Date(dateStr);
+      return format(date, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
       return dateStr;

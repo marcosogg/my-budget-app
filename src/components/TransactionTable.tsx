@@ -1,5 +1,5 @@
 import { Transaction } from '@/types/transaction';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import {
   Table,
   TableBody,
@@ -17,9 +17,9 @@ interface TransactionTableProps {
 const TransactionTable = ({ transactions }: TransactionTableProps) => {
   const formatDate = (dateStr: string) => {
     try {
-      // Parse the date string in the format "DD/MM/YYYY HH:mm"
-      const parsedDate = parse(dateStr, 'dd/MM/yyyy HH:mm', new Date());
-      return format(parsedDate, 'dd/MM/yyyy');
+      // Parse the ISO date string directly
+      const date = new Date(dateStr);
+      return format(date, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
       return dateStr; // Return original string if parsing fails
