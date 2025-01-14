@@ -19,7 +19,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
     try {
       // Parse the date string in the format "DD/MM/YYYY HH:mm"
       const parsedDate = parse(dateStr, 'dd/MM/yyyy HH:mm', new Date());
-      return format(parsedDate, 'dd MMM yyyy HH:mm');
+      return format(parsedDate, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
       return dateStr; // Return original string if parsing fails

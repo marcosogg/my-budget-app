@@ -30,7 +30,7 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
   const formatDate = (dateStr: string) => {
     try {
       const parsedDate = parse(dateStr, 'dd/MM/yyyy HH:mm', new Date());
-      return format(parsedDate, 'dd MMM yyyy HH:mm');
+      return format(parsedDate, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
       return dateStr;
