@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Transactions from "./pages/Transactions";
@@ -10,7 +12,6 @@ import Upload from "./pages/Upload";
 import Categorize from "./pages/Categorize";
 import { supabase } from "./integrations/supabase/client";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-
 
 const queryClient = new QueryClient();
 
@@ -68,41 +69,49 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Transactions />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/upload"
-                element={
-                  <ProtectedRoute>
-                    <Upload />
-                  </ProtectedRoute>
-                }
-              />
-               <Route
-                path="/categorize"
-                element={
-                  <ProtectedRoute>
-                    <Categorize />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
+            <SidebarProvider>
+              <div className="min-h-screen flex w-full">
+                {authState.isAuthenticated && !authState.isLoading && <AppSidebar />}
+                <main className="flex-1">
+                  {authState.isAuthenticated && !authState.isLoading && <SidebarTrigger />}
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <Index />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/transactions"
+                      element={
+                        <ProtectedRoute>
+                          <Transactions />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/upload"
+                      element={
+                        <ProtectedRoute>
+                          <Upload />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/categorize"
+                      element={
+                        <ProtectedRoute>
+                          <Categorize />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Routes>
+                </main>
+              </div>
+            </SidebarProvider>
           </BrowserRouter>
         </TooltipProvider>
       </AuthContext.Provider>
