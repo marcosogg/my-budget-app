@@ -41,7 +41,7 @@ const Categorize = () => {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .not('id', 'in', transactionIds)
+        .not('id', 'in', `(${transactionIds.join(',')})`)
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -154,11 +154,11 @@ const Categorize = () => {
     }
   };
 
-  if (isLoadingTransactions || isLoadingCategories) {
+  if (isLoadingTransactions) {
     return <div className="container py-8">Loading...</div>;
   }
 
-  if (errorTransactions || errorCategories) {
+  if (errorTransactions) {
     return <div className="container py-8">Error loading data.</div>;
   }
 
