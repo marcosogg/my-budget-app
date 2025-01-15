@@ -1,3 +1,5 @@
+import { Database } from "../database/schema";
+
 export type Json =
   | string
   | number
