@@ -19,10 +19,18 @@ const Categorize = () => {
   const { data: transactions = [], isLoading: isLoadingTransactions, error: errorTransactions } = useQuery({
     queryKey: ['uncategorizedTransactions'],
     queryFn: async () => {
+      // First, get all categorized transaction IDs
+      const { data: categorizedIds } = await supabase
+        .from('categorized_transactions')
+        .select('transaction_id');
+
+      const transactionIds = categorizedIds?.map(ct => ct.transaction_id) || [];
+
+      // Then get all transactions that are not in that list
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .not('id', 'in', supabase.from('categorized_transactions').select('transaction_id'))
+        .not('id', 'in', `(${transactionIds.map(id => `'${id}'`).join(',')})`)
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -34,18 +42,7 @@ const Categorize = () => {
         throw error;
       }
 
-      return data.map(transaction => ({
-        type: transaction.type,
-        product: transaction.product,
-        started_date: transaction.started_date,
-        completed_date: transaction.completed_date,
-        description: transaction.description,
-        amount: transaction.amount,
-        fee: transaction.fee,
-        currency: transaction.currency,
-        state: transaction.state,
-        balance: transaction.balance
-      })) as Transaction[];
+      return data as Transaction[];
     },
   });
 
