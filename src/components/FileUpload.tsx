@@ -11,9 +11,42 @@ interface FileUploadProps {
 }
 
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
+  const clearExistingData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('Please sign in to manage transactions');
+        return false;
+      }
+
+      // Delete all existing transactions for the current user
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error clearing transactions:', error);
+        toast.error('Failed to clear existing transactions');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to clear existing data');
+      return false;
+    }
+  };
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
+      // Clear existing data before processing new file
+      const cleared = await clearExistingData();
+      if (!cleared) return;
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         const text = e.target?.result as string;
