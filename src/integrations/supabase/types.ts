@@ -146,7 +146,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      monthly_category_spending: {
+        Row: {
+          category_name: string | null
+          month: string | null
+          total_amount: number | null
+          transaction_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      monthly_total_spending: {
+        Row: {
+          month: string | null
+          total_amount: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
