@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Transaction } from '@/types/transaction';
 import { Category } from '@/types/categorization';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// import { Textarea } from '@/components/ui/textarea'; // Removed Textarea import
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import CategorizedTransactionTable from '@/components/CategorizedTransactionTable';
 
@@ -26,11 +26,22 @@ const Categorize = () => {
 
       const transactionIds = categorizedIds?.map(ct => ct.transaction_id) || [];
 
+      // If there are no categorized transactions, just get all transactions
+      if (transactionIds.length === 0) {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .order('completed_date', { ascending: false });
+
+        if (error) throw error;
+        return data as Transaction[];
+      }
+
       // Then get all transactions that are not in that list
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .not('id', 'in', `(${transactionIds.map(id => `'${id}'`).join(',')})`)
+        .not('id', 'in', `(${transactionIds.join(',')})`)
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -143,11 +154,11 @@ const Categorize = () => {
     }
   };
 
-  if (isLoadingTransactions || isLoadingCategories) {
+  if (isLoadingTransactions) {
     return <div className="container py-8">Loading...</div>;
   }
 
-  if (errorTransactions || errorCategories) {
+  if (errorTransactions) {
     return <div className="container py-8">Error loading data.</div>;
   }
 
@@ -190,7 +201,11 @@ const Categorize = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {/* Removed Textarea component */}
+                <Textarea
+                  placeholder="Add notes (optional)"
+                  className="w-[300px]"
+                  onChange={(e) => handleNotesChange(transaction.id, e.target.value)}
+                />
                 <Button onClick={() => handleCategorize(transaction.id)}>Categorize</Button>
               </div>
             </div>
