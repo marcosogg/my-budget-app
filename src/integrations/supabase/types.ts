@@ -15,24 +15,21 @@ export type Database = {
           display_order: number | null
           id: string
           name: string
-          user_id: string | null
-          is_system: boolean
+          user_id: string
         }
         Insert: {
           created_at?: string
           display_order?: number | null
           id?: string
           name: string
-          user_id?: string | null
-          is_system?: boolean
+          user_id: string
         }
         Update: {
           created_at?: string
           display_order?: number | null
           id?: string
           name?: string
-          user_id?: string | null
-          is_system?: boolean
+          user_id?: string
         }
         Relationships: []
       }
@@ -80,40 +77,67 @@ export type Database = {
           },
         ]
       }
-      categorized_transactions: {
+      categories: {
         Row: {
-          id: string
-          transaction_id: string
-          category_id: string
-          user_id: string
-          notes: string | null
           created_at: string
-          updated_at: string | null
+          display_order: number | null
+          id: string
+          is_system: boolean
+          name: string
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          transaction_id: string
-          category_id: string
-          user_id: string
-          notes?: string | null
           created_at?: string
-          updated_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_system?: boolean
+          name: string
+          user_id?: string | null
         }
         Update: {
-          id?: string
-          transaction_id?: string
-          category_id?: string
-          user_id?: string
-          notes?: string | null
           created_at?: string
+          display_order?: number | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      categorized_transactions: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          transaction_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          transaction_id: string
           updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          transaction_id?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "categorized_transactions_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "budget_categories"
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
@@ -122,7 +146,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "transactions"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       profiles: {
