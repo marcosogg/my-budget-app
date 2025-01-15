@@ -1,4 +1,4 @@
-import { Home, Upload, FileText, Tags } from "lucide-react";
+import { Home, Upload, FileText, Tags, BarChart2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
@@ -35,6 +35,14 @@ const items = [
   },
 ];
 
+const analyticsItems = [
+  {
+    title: "Categories",
+    url: "/analytics/categories",
+    icon: BarChart2,
+  },
+];
+
 export function AppSidebar() {
   const location = useLocation();
 
@@ -46,6 +54,28 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.url}
+                    tooltip={item.title}
+                  >
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {analyticsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
