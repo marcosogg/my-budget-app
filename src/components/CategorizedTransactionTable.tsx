@@ -80,16 +80,37 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
 
   const handleUpdateCategory = async (transactionId: string, newCategoryId: string) => {
     try {
-      const { error } = await supabase
+      // Get the description of the current transaction
+      const currentTransaction = categorizedTransactions.find(t => t.id === transactionId);
+      if (!currentTransaction) return;
+
+      const description = currentTransaction.transactions.description;
+
+      // Update all categorized transactions with the same description
+      const { error: updateError } = await supabase
         .from('categorized_transactions')
         .update({ category_id: newCategoryId })
         .eq('id', transactionId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Update or create the description_category_mapping
+      const { error: mappingError } = await supabase
+        .from('description_category_mappings')
+        .upsert({
+          description: description || '',
+          category_id: newCategoryId,
+          user_id: currentTransaction.user_id,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'description,user_id',
+        });
+
+      if (mappingError) throw mappingError;
 
       toast({
         title: "Success",
-        description: "Category updated successfully",
+        description: "Category updated successfully for all matching transactions",
       });
       
       setEditingId(null);
