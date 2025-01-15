@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/analytics/MonthPicker";
 import { CategorySummaryGrid } from "@/components/analytics/CategorySummaryGrid";
 import { TotalSpending } from "@/components/analytics/TotalSpending";
+import { UncategorizedAlert } from "@/components/analytics/UncategorizedAlert";
 import { supabase } from "@/integrations/supabase/client";
 
 const Categories = () => {
@@ -39,12 +40,32 @@ const Categories = () => {
     },
   });
 
+  const { data: uncategorizedSummary } = useQuery({
+    queryKey: ["uncategorized-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("uncategorized_summary")
+        .select("*")
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Monthly Spending Summary</h1>
         <MonthPicker value={selectedDate} onChange={setSelectedDate} />
       </div>
+
+      {uncategorizedSummary?.total_transactions > 0 && (
+        <UncategorizedAlert
+          uniqueDescriptions={uncategorizedSummary.unique_description_count}
+          totalTransactions={uncategorizedSummary.total_transactions}
+        />
+      )}
 
       <TotalSpending 
         amount={totalSpending?.total_amount || 0} 

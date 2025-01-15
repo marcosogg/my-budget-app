@@ -164,6 +164,22 @@ export type Database = {
         }
         Relationships: []
       }
+      uncategorized_descriptions: {
+        Row: {
+          description: string | null
+          occurrence_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      uncategorized_summary: {
+        Row: {
+          total_transactions: number | null
+          unique_description_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
