@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -10,13 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import CategorizedTransactionTable from '@/components/CategorizedTransactionTable';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { MappingDialog } from '@/components/mappings/MappingDialog';
 
 const Categorize = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [categorizedTransactions, setCategorizedTransactions] = useState<{ [key: string]: string | null }>({});
+  const [isMappingDialogOpen, setIsMappingDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const { data: transactions = [], isLoading: isLoadingTransactions, error: errorTransactions } = useQuery({
     queryKey: ['uncategorizedTransactions'],
@@ -58,7 +61,7 @@ const Categorize = () => {
     },
   });
 
-  const { data: categories = [], isLoading: isLoadingCategories, error: errorCategories } = useQuery({
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -91,6 +94,11 @@ const Categorize = () => {
       ...prev,
       [`notes-${transactionId}`]: notes,
     }));
+  };
+
+  const handleCreateMapping = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsMappingDialogOpen(true);
   };
 
   const handleCategorize = async (transactionId: string) => {
@@ -128,19 +136,13 @@ const Categorize = () => {
           notes: notes,
         });
 
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to categorize transaction",
-        });
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Transaction categorized successfully",
       });
+
       setCategorizedTransactions(prev => {
         const { [transactionId]: _, ...rest } = prev;
         const { [`notes-${transactionId}`]: __, ...restWithNotes } = rest;
@@ -172,15 +174,16 @@ const Categorize = () => {
         </Button>
         <div>
           <h1 className="text-4xl font-bold mb-2">Categorize Transactions</h1>
-          <p className="text-gray-600">Categorize your transactions</p>
+          <p className="text-gray-600">Review and update transaction categories</p>
         </div>
         <div className="w-[100px]" />
       </div>
 
       <Alert>
         <InfoIcon className="h-4 w-4" />
+        <AlertTitle>Automatic Categorization</AlertTitle>
         <AlertDescription>
-          Showing unique uncategorized expense transactions only. Transactions are filtered to show expenses (negative amounts) with unique descriptions.
+          Transactions are automatically categorized based on description mappings. You can manually override categories here or create new mappings for future transactions.
         </AlertDescription>
       </Alert>
 
@@ -215,13 +218,30 @@ const Categorize = () => {
                   onChange={(e) => handleNotesChange(transaction.id, e.target.value)}
                 />
                 <Button onClick={() => handleCategorize(transaction.id)}>Categorize</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleCreateMapping(transaction)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Mapping
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
+
       <h2 className="text-2xl font-bold mt-8">Categorized Transactions</h2>
       <CategorizedTransactionTable />
+
+      <MappingDialog
+        open={isMappingDialogOpen}
+        onOpenChange={setIsMappingDialogOpen}
+        mapping={selectedTransaction ? {
+          description: selectedTransaction.description || '',
+          category_id: categorizedTransactions[selectedTransaction.id] || '',
+        } : undefined}
+      />
     </div>
   );
 };
