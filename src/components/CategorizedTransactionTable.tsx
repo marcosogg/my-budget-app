@@ -70,7 +70,7 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
 
     if (filterDate) {
       filtered = filtered.filter(transaction => {
-        const transactionDate = new Date(transaction.transactions.completedDate);
+        const transactionDate = new Date(transaction.transactions.completed_date || '');
         return (
           transactionDate.getFullYear() === filterDate.getFullYear() &&
           transactionDate.getMonth() === filterDate.getMonth() &&
@@ -86,9 +86,9 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
     let sorted = [...filteredTransactions];
 
     if (sortOption === "date-asc") {
-      sorted.sort((a, b) => new Date(a.transactions.completedDate).getTime() - new Date(b.transactions.completedDate).getTime());
+      sorted.sort((a, b) => new Date(a.transactions.completed_date || '').getTime() - new Date(b.transactions.completed_date || '').getTime());
     } else if (sortOption === "date-desc") {
-      sorted.sort((a, b) => new Date(b.transactions.completedDate).getTime() - new Date(a.transactions.completedDate).getTime());
+      sorted.sort((a, b) => new Date(b.transactions.completed_date || '').getTime() - new Date(a.transactions.completed_date || '').getTime());
     } else if (sortOption === "amount-asc") {
       sorted.sort((a, b) => a.transactions.amount - b.transactions.amount);
     } else if (sortOption === "amount-desc") {
@@ -98,13 +98,14 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
     return sorted;
   }, [filteredTransactions, sortOption]);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
     try {
       const date = new Date(dateStr);
       return format(date, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
-      return dateStr;
+      return '';
     }
   };
 
@@ -219,7 +220,7 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
             {sortedTransactions.map((categorizedTransaction) => (
               <TableRow key={categorizedTransaction.id}>
                 <TableCell className="font-medium">{categorizedTransaction.categories.name}</TableCell>
-                <TableCell>{formatDate(categorizedTransaction.transactions.completedDate)}</TableCell>
+                <TableCell>{formatDate(categorizedTransaction.transactions.completed_date)}</TableCell>
                 <TableCell>{categorizedTransaction.transactions.description}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">

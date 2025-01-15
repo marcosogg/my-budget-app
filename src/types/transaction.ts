@@ -1,12 +1,15 @@
 export interface Transaction {
+  id: string;
+  user_id: string;
   type: string;
-  product: string;
-  startedDate: string;
-  completedDate: string;
-  description: string;
+  product: string | null;
+  started_date: string | null;
+  completed_date: string | null;
+  description: string | null;
   amount: number;
-  fee: number;
+  fee: number | null;
   currency: string;
-  state: string;
+  state: string | null;
   balance: number;
+  created_at: string;
 }
