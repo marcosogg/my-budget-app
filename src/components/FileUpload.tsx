@@ -10,6 +10,74 @@ interface FileUploadProps {
   onFileUpload: (data: Transaction[]) => void;
 }
 
+const parseCustomDate = (dateStr: string): string | null => {
+  if (!dateStr) return null;
+  
+  try {
+    console.log('Parsing date:', dateStr);
+    // Split date and time
+    const [datePart, timePart] = dateStr.split(' ');
+    if (!datePart || !timePart) {
+      console.error('Invalid date format - missing date or time part:', dateStr);
+      return null;
+    }
+
+    const [month, day, year] = datePart.split('/');
+    const [hours, minutes] = timePart.split(':');
+
+    if (!month || !day || !year || !hours || !minutes) {
+      console.error('Invalid date components:', { month, day, year, hours, minutes });
+      return null;
+    }
+
+    // Validate numeric values
+    const numMonth = parseInt(month);
+    const numDay = parseInt(day);
+    const numYear = parseInt(year);
+    const numHours = parseInt(hours);
+    const numMinutes = parseInt(minutes);
+
+    // Basic validation
+    if (
+      numMonth < 1 || numMonth > 12 ||
+      numDay < 1 || numDay > 31 ||
+      numHours < 0 || numHours > 23 ||
+      numMinutes < 0 || numMinutes > 59
+    ) {
+      console.error('Date components out of valid range:', {
+        month: numMonth,
+        day: numDay,
+        hours: numHours,
+        minutes: numMinutes
+      });
+      return null;
+    }
+
+    // Create full year (20XX)
+    const fullYear = numYear < 50 ? 2000 + numYear : 1900 + numYear;
+
+    // Create date object with all components
+    const date = new Date(
+      fullYear,
+      numMonth - 1, // months are 0-based
+      numDay,
+      numHours,
+      numMinutes
+    );
+
+    // Validate the resulting date
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date object created:', date);
+      return null;
+    }
+
+    return date.toISOString();
+  } catch (error) {
+    console.error('Error parsing date:', dateStr, error);
+    return null;
+  }
+};
+
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -62,7 +130,6 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
     toast.info('Processing your CSV file...', { duration: 2000 });
 
     try {
-      // Clear existing data before processing new file
       const cleared = await clearExistingData();
       if (!cleared) {
         setIsUploading(false);
@@ -104,7 +171,12 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                 return parseFloat(value);
               }
               if (field === 'completedDate' || field === 'startedDate') {
-                return new Date(value).toISOString();
+                const parsedDate = parseCustomDate(value);
+                if (!parsedDate) {
+                  console.error('Failed to parse date:', value);
+                  return null;
+                }
+                return parsedDate;
               }
               return value;
             },
@@ -112,11 +184,11 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
               try {
                 console.log('CSV parsing complete. Row count:', results.data.length);
                 const transactions = (results.data as Transaction[])
-                  .filter(t => t.state === 'COMPLETED');
+                  .filter(t => t.state === 'COMPLETED' && t.completedDate && t.startedDate);
                 console.log('Filtered completed transactions count:', transactions.length);
                 
                 if (transactions.length === 0) {
-                  toast.error('No completed transactions found in the CSV');
+                  toast.error('No valid completed transactions found in the CSV');
                   setIsUploading(false);
                   return;
                 }
