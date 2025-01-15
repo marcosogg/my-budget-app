@@ -24,19 +24,17 @@ const Categorize = () => {
   const { data: transactions = [], isLoading: isLoadingTransactions, error: errorTransactions } = useQuery({
     queryKey: ['uncategorizedTransactions'],
     queryFn: async () => {
-      // First, get all categorized transaction IDs
       const { data: categorizedIds } = await supabase
         .from('categorized_transactions')
         .select('transaction_id');
 
       const transactionIds = categorizedIds?.map(ct => ct.transaction_id) || [];
 
-      // Get uncategorized transactions
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .not('id', 'in', `(${transactionIds.join(',')})`)
-        .lt('amount', 0) // Only get expenses (negative amounts)
+        .lt('amount', 0)
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -48,7 +46,6 @@ const Categorize = () => {
         throw error;
       }
 
-      // Create a Map to store unique descriptions
       const uniqueDescriptions = new Map();
       data?.forEach(transaction => {
         const description = transaction.description;
@@ -237,10 +234,7 @@ const Categorize = () => {
       <MappingDialog
         open={isMappingDialogOpen}
         onOpenChange={setIsMappingDialogOpen}
-        mapping={selectedTransaction ? {
-          description: selectedTransaction.description || '',
-          category_id: categorizedTransactions[selectedTransaction.id] || '',
-        } : undefined}
+        mapping={undefined}
       />
     </div>
   );
