@@ -22,7 +22,8 @@ const parseCustomDate = (dateStr: string): string | null => {
       return null;
     }
 
-    const [month, day, year] = datePart.split('/');
+    // Switch day and month positions for European format (DD/MM/YYYY)
+    const [day, month, year] = datePart.split('/');
     const [hours, minutes] = timePart.split(':');
 
     if (!month || !day || !year || !hours || !minutes) {
@@ -50,6 +51,13 @@ const parseCustomDate = (dateStr: string): string | null => {
         hours: numHours,
         minutes: numMinutes
       });
+      return null;
+    }
+
+    // Additional validation for days in month
+    const daysInMonth = new Date(numYear, numMonth, 0).getDate();
+    if (numDay > daysInMonth) {
+      console.error(`Invalid day ${numDay} for month ${numMonth}`);
       return null;
     }
 
