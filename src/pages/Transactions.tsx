@@ -70,6 +70,7 @@ const Transactions = () => {
         </div>
       ) : (
         <>
+          <TransactionTable transactions={transactions} />
         </>
       )}
     </div>
