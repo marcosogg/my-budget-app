@@ -41,10 +41,16 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
             if (field === 'amount' || field === 'fee' || field === 'balance') {
               return parseFloat(value);
             }
+            if (field === 'completedDate' || field === 'startedDate') {
+              // Parse date in M/D/YY H:MM format
+              const date = new Date(value);
+              return date.toISOString();
+            }
             return value;
           },
           complete: async (results) => {
-            const transactions = results.data as Transaction[];
+            const transactions = (results.data as Transaction[])
+              .filter(t => t.state === 'COMPLETED'); // Filter only completed transactions
             
             try {
               const { data: { user } } = await supabase.auth.getUser();
