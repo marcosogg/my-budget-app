@@ -15,8 +15,8 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
 
   const clearExistingData = async () => {
     try {
-      console.log('Attempting to clear existing data...');
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user);
       
       if (!user) {
         console.error('No authenticated user found');
@@ -24,7 +24,6 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         return false;
       }
 
-      console.log('Deleting transactions for user:', user.id);
       const { error } = await supabase
         .from('transactions')
         .delete()
@@ -46,46 +45,41 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+
+    const file = acceptedFiles[0];
+    console.log('Processing file:', file.name, 'Type:', file.type);
+    
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      toast.error('Please upload a valid CSV file');
+      return;
+    }
+
+    setIsUploading(true);
+    toast.info('Processing your CSV file...', { duration: 2000 });
+
     try {
-      setIsUploading(true);
-      console.log('File dropped:', acceptedFiles);
-      
-      if (acceptedFiles.length === 0) {
-        toast.error('Please select a CSV file');
-        return;
-      }
-
-      const file = acceptedFiles[0];
-      console.log('Processing file:', file.name);
-      
-      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-        toast.error('Please upload a valid CSV file');
-        return;
-      }
-
       // Clear existing data before processing new file
       const cleared = await clearExistingData();
       if (!cleared) {
-        console.error('Failed to clear existing data');
+        setIsUploading(false);
         return;
       }
-
-      toast.info('Processing your CSV file...', {
-        duration: 2000,
-      });
 
       const reader = new FileReader();
       
       reader.onload = async (e) => {
         try {
-          console.log('File read successfully');
+          console.log('File read successfully, starting CSV parsing');
           const text = e.target?.result as string;
           
           if (!text) {
             throw new Error('Failed to read file content');
           }
           
-          // Parse CSV data
           parse(text, {
             header: true,
             skipEmptyLines: true,
@@ -110,32 +104,34 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                 return parseFloat(value);
               }
               if (field === 'completedDate' || field === 'startedDate') {
-                const date = new Date(value);
-                return date.toISOString();
+                return new Date(value).toISOString();
               }
               return value;
             },
             complete: async (results) => {
               try {
-                console.log('CSV parsing complete. Raw data:', results.data);
+                console.log('CSV parsing complete. Row count:', results.data.length);
                 const transactions = (results.data as Transaction[])
                   .filter(t => t.state === 'COMPLETED');
-                console.log('Filtered transactions:', transactions);
+                console.log('Filtered completed transactions count:', transactions.length);
                 
                 if (transactions.length === 0) {
                   toast.error('No completed transactions found in the CSV');
+                  setIsUploading(false);
                   return;
                 }
 
                 const { data: { user } } = await supabase.auth.getUser();
+                console.log('Current user for transaction upload:', user);
                 
                 if (!user) {
                   console.error('No authenticated user found during upload');
                   toast.error('Please sign in to save transactions');
+                  setIsUploading(false);
                   return;
                 }
 
-                console.log('Saving transactions for user:', user.id);
+                console.log('Preparing to save transactions for user:', user.id);
                 const { error } = await supabase.from('transactions').insert(
                   transactions.map(t => ({
                     user_id: user.id,
@@ -155,6 +151,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                 if (error) {
                   console.error('Error saving transactions:', error);
                   toast.error('Failed to save transactions');
+                  setIsUploading(false);
                   return;
                 }
 
@@ -187,7 +184,6 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         setIsUploading(false);
       };
 
-      console.log('Starting to read file');
       reader.readAsText(file);
     } catch (error) {
       console.error('Unexpected error during file upload:', error);
