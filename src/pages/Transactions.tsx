@@ -23,6 +23,18 @@ const Transactions = () => {
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
   const [sortOption, setSortOption] = useState<string>("");
 
+  const handleSortOptionChange = (value: string) => {
+    setSortOption(value);
+  };
+
+  const handleFilterTypeChange = (value: string) => {
+    setFilterType(value);
+  };
+
+  const handleFilterDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterDescription(event.target.value);
+  };
+
   const { data: transactions = [], isLoading, error } = useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
