@@ -71,6 +71,13 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
   const onSubmit = async (data: MappingFormData) => {
     setIsSubmitting(true);
     try {
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       if (mapping) {
         const { error } = await supabase
           .from("description_category_mappings")
@@ -84,10 +91,13 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
         if (error) throw error;
         toast({ title: "Mapping updated successfully" });
       } else {
-        const { error } = await supabase.from("description_category_mappings").insert({
-          description: data.description,
-          category_id: data.category_id,
-        });
+        const { error } = await supabase
+          .from("description_category_mappings")
+          .insert({
+            description: data.description,
+            category_id: data.category_id,
+            user_id: user.id,
+          });
 
         if (error) throw error;
         toast({ title: "Mapping created successfully" });
