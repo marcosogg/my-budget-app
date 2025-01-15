@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MappingDialog } from "@/components/mappings/MappingDialog";
 import { DeleteMappingDialog } from "@/components/mappings/DeleteMappingDialog";
+import { JsonMappingUpload } from "@/components/mappings/JsonMappingUpload";
 
 interface Mapping {
   id: string;
@@ -68,10 +69,13 @@ const Mappings = () => {
     <div className="container py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Description Mappings</h1>
-        <Button onClick={handleAddNew}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Mapping
-        </Button>
+        <div className="flex gap-4">
+          <JsonMappingUpload />
+          <Button onClick={handleAddNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Mapping
+          </Button>
+        </div>
       </div>
 
       <Table>
