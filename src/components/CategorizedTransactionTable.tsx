@@ -20,6 +20,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface CategorizedTransactionTableProps {
   
@@ -49,7 +51,24 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
         throw error;
       }
 
-      return data as (CategorizedTransaction & { transactions: Transaction, categories: Category })[];
+      // Filter for expenses (negative amounts) and get unique descriptions
+      const expenseTransactions = data?.filter(
+        transaction => transaction.transactions.amount < 0
+      ) || [];
+
+      // Create a Map to store unique descriptions
+      const uniqueDescriptions = new Map();
+      expenseTransactions.forEach(transaction => {
+        const description = transaction.transactions.description;
+        if (description && !uniqueDescriptions.has(description)) {
+          uniqueDescriptions.set(description, transaction);
+        }
+      });
+
+      return Array.from(uniqueDescriptions.values()) as (CategorizedTransaction & { 
+        transactions: Transaction, 
+        categories: Category 
+      })[];
     },
   });
 
@@ -151,6 +170,12 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
 
   return (
     <div className="space-y-4">
+      <Alert>
+        <InfoIcon className="h-4 w-4" />
+        <AlertDescription>
+          Showing unique expense transactions only. Transactions are filtered to show expenses (negative amounts) with unique descriptions.
+        </AlertDescription>
+      </Alert>
       <div className="flex flex-wrap gap-4">
         <Select onValueChange={handleSortOptionChange}>
           <SelectTrigger className="w-[200px]">
