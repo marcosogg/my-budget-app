@@ -1,4 +1,3 @@
-// src/pages/Transactions.tsx
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import TransactionTable from "@/components/TransactionTable";
@@ -102,8 +101,8 @@ const Transactions = () => {
     return sorted;
   }, [filteredTransactions, sortOption]);
 
-  const handleFilterTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilterType(e.target.value);
+  const handleFilterTypeChange = (value: string) => {
+    setFilterType(value);
   };
 
   const handleFilterDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,13 +144,18 @@ const Transactions = () => {
             <SelectItem value="amount-desc">Amount (Descending)</SelectItem>
           </SelectContent>
         </Select>
-        <Input
-          type="text"
-          placeholder="Filter by Type"
-          value={filterType}
-          onChange={handleFilterTypeChange}
-          className="w-[200px]"
-        />
+        <Select onValueChange={handleFilterTypeChange}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {transactions.map((transaction) => (
+              <SelectItem key={transaction.type} value={transaction.type}>
+                {transaction.type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Input
           type="text"
           placeholder="Filter by Description"

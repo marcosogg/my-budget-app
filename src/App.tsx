@@ -1,14 +1,16 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
+import Categorize from "./pages/Categorize";
 import { supabase } from "./integrations/supabase/client";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+
 
 const queryClient = new QueryClient();
 
@@ -89,6 +91,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Upload />
+                  </ProtectedRoute>
+                }
+              />
+               <Route
+                path="/categorize"
+                element={
+                  <ProtectedRoute>
+                    <Categorize />
                   </ProtectedRoute>
                 }
               />
