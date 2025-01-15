@@ -13,14 +13,16 @@ interface FileUploadProps {
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
   const clearExistingData = async () => {
     try {
+      console.log('Attempting to clear existing data...');
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        console.error('No authenticated user found');
         toast.error('Please sign in to manage transactions');
         return false;
       }
 
-      // Delete all existing transactions for the current user
+      console.log('Deleting transactions for user:', user.id);
       const { error } = await supabase
         .from('transactions')
         .delete()
@@ -32,23 +34,31 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         return false;
       }
 
+      console.log('Successfully cleared existing transactions');
       return true;
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in clearExistingData:', error);
       toast.error('Failed to clear existing data');
       return false;
     }
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    console.log('File dropped:', acceptedFiles);
     const file = acceptedFiles[0];
     if (file) {
+      console.log('Processing file:', file.name);
+      
       // Clear existing data before processing new file
       const cleared = await clearExistingData();
-      if (!cleared) return;
+      if (!cleared) {
+        console.error('Failed to clear existing data');
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = async (e) => {
+        console.log('File read successfully');
         const text = e.target?.result as string;
         
         // Parse CSV data
@@ -68,6 +78,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
               'State': 'state',
               'Balance': 'balance'
             };
+            console.log('Transforming header:', header, 'to:', headerMap[header] || header);
             return headerMap[header] || header;
           },
           transform: (value, field) => {
@@ -82,17 +93,21 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
             return value;
           },
           complete: async (results) => {
+            console.log('CSV parsing complete. Raw data:', results.data);
             const transactions = (results.data as Transaction[])
-              .filter(t => t.state === 'COMPLETED'); // Filter only completed transactions
+              .filter(t => t.state === 'COMPLETED');
+            console.log('Filtered transactions:', transactions);
             
             try {
               const { data: { user } } = await supabase.auth.getUser();
               
               if (!user) {
+                console.error('No authenticated user found during upload');
                 toast.error('Please sign in to save transactions');
                 return;
               }
 
+              console.log('Saving transactions for user:', user.id);
               // Save transactions to Supabase
               const { error } = await supabase.from('transactions').insert(
                 transactions.map(t => ({
@@ -116,15 +131,27 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                 return;
               }
 
+              console.log('Transactions saved successfully');
               onFileUpload(transactions);
               toast.success('Transactions saved successfully!');
             } catch (error) {
-              console.error('Error:', error);
+              console.error('Error in complete callback:', error);
               toast.error('Failed to process file');
             }
           },
+          error: (error) => {
+            console.error('CSV parsing error:', error);
+            toast.error('Failed to parse CSV file');
+          }
         });
       };
+
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        toast.error('Failed to read file');
+      };
+
+      console.log('Starting to read file');
       reader.readAsText(file);
     }
   }, [onFileUpload]);
