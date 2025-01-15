@@ -4,6 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { MappingDialog } from "@/components/mappings/MappingDialog";
+import { DeleteMappingDialog } from "@/components/mappings/DeleteMappingDialog";
 
 interface Mapping {
   id: string;
@@ -13,6 +15,11 @@ interface Mapping {
 }
 
 const Mappings = () => {
+  const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>();
+  const [isAddEditOpen, setIsAddEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [mappingToDelete, setMappingToDelete] = useState<string | null>(null);
+
   const { data: mappings, isLoading } = useQuery({
     queryKey: ["description-mappings"],
     queryFn: async () => {
@@ -38,6 +45,21 @@ const Mappings = () => {
     },
   });
 
+  const handleEdit = (mapping: Mapping) => {
+    setSelectedMapping(mapping);
+    setIsAddEditOpen(true);
+  };
+
+  const handleDelete = (mappingId: string) => {
+    setMappingToDelete(mappingId);
+    setIsDeleteOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setSelectedMapping(undefined);
+    setIsAddEditOpen(true);
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -46,7 +68,7 @@ const Mappings = () => {
     <div className="container py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Description Mappings</h1>
-        <Button>
+        <Button onClick={handleAddNew}>
           <Plus className="h-4 w-4 mr-2" />
           Add Mapping
         </Button>
@@ -67,10 +89,18 @@ const Mappings = () => {
               <TableCell>{mapping.category_name}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(mapping)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(mapping.id)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -79,6 +109,20 @@ const Mappings = () => {
           ))}
         </TableBody>
       </Table>
+
+      <MappingDialog
+        open={isAddEditOpen}
+        onOpenChange={setIsAddEditOpen}
+        mapping={selectedMapping}
+      />
+
+      {mappingToDelete && (
+        <DeleteMappingDialog
+          open={isDeleteOpen}
+          onOpenChange={setIsDeleteOpen}
+          mappingId={mappingToDelete}
+        />
+      )}
     </div>
   );
 };
