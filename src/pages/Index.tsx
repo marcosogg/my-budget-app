@@ -28,18 +28,20 @@ const Index = () => {
         throw error;
       }
 
-      // Map the snake_case database fields to camelCase for the Transaction interface
       return data.map(transaction => ({
         type: transaction.type,
         product: transaction.product,
-        startedDate: transaction.started_date,
-        completedDate: transaction.completed_date,
+        started_date: transaction.started_date,
+        completed_date: transaction.completed_date,
         description: transaction.description,
         amount: transaction.amount,
         fee: transaction.fee,
         currency: transaction.currency,
         state: transaction.state,
-        balance: transaction.balance
+        balance: transaction.balance,
+        id: transaction.id,
+        user_id: transaction.user_id,
+        created_at: transaction.created_at,
       })) as Transaction[];
     },
   });

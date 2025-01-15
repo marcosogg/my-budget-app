@@ -47,7 +47,7 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
   };
 
   const dates = transactions
-    .map(t => new Date(t.completedDate).getTime())
+    .map(t => new Date(t.completed_date || '').getTime())
     .sort((a, b) => a - b);
 
   const firstTransactionDate = dates.length > 0 ? new Date(dates[0]) : null;

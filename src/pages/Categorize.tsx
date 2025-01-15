@@ -37,8 +37,8 @@ const Categorize = () => {
       return data.map(transaction => ({
         type: transaction.type,
         product: transaction.product,
-        startedDate: transaction.started_date,
-        completedDate: transaction.completed_date,
+        started_date: transaction.started_date,
+        completed_date: transaction.completed_date,
         description: transaction.description,
         amount: transaction.amount,
         fee: transaction.fee,
@@ -178,7 +178,7 @@ const Categorize = () => {
             <div key={transaction.id} className="border rounded-md p-4">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-xl font-semibold">{transaction.description}</h2>
-                <p className="text-gray-500">{new Date(transaction.completedDate).toLocaleDateString()}</p>
+                <p className="text-gray-500">{new Date(transaction.completed_date || '').toLocaleDateString()}</p>
               </div>
               <div className="flex flex-wrap gap-4 items-center">
                 <Select onValueChange={(value) => handleCategoryChange(transaction.id, value)}>

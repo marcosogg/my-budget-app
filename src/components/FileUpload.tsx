@@ -165,8 +165,8 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
               const headerMap: { [key: string]: string } = {
                 'Type': 'type',
                 'Product': 'product',
-                'Started Date': 'startedDate',
-                'Completed Date': 'completedDate',
+                'Started Date': 'started_date',
+                'Completed Date': 'completed_date',
                 'Description': 'description',
                 'Amount': 'amount',
                 'Fee': 'fee',
@@ -181,7 +181,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
               if (field === 'amount' || field === 'fee' || field === 'balance') {
                 return parseFloat(value);
               }
-              if (field === 'completedDate' || field === 'startedDate') {
+              if (field === 'completed_date' || field === 'started_date') {
                 const parsedDate = parseCustomDate(value);
                 if (!parsedDate) {
                   console.error('Failed to parse date:', value);
@@ -195,7 +195,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
               try {
                 console.log('CSV parsing complete. Row count:', results.data.length);
                 const transactions = (results.data as Transaction[])
-                  .filter(t => t.state === 'COMPLETED' && t.completedDate && t.startedDate);
+                  .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date);
                 console.log('Filtered completed transactions count:', transactions.length);
                 
                 if (transactions.length === 0) {
@@ -221,8 +221,8 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                     user_id: user.id,
                     type: t.type,
                     product: t.product,
-                    started_date: t.startedDate,
-                    completed_date: t.completedDate,
+                    started_date: t.started_date,
+                    completed_date: t.completed_date,
                     description: t.description,
                     amount: t.amount,
                     fee: t.fee,

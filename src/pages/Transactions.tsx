@@ -40,18 +40,20 @@ const Transactions = () => {
         throw error;
       }
 
-      // Map the snake_case database fields to camelCase for the Transaction interface
       return data.map(transaction => ({
+        id: transaction.id,
+        user_id: transaction.user_id,
         type: transaction.type,
         product: transaction.product,
-        startedDate: transaction.started_date,
-        completedDate: transaction.completed_date,
+        started_date: transaction.started_date,
+        completed_date: transaction.completed_date,
         description: transaction.description,
         amount: transaction.amount,
         fee: transaction.fee,
         currency: transaction.currency,
         state: transaction.state,
-        balance: transaction.balance
+        balance: transaction.balance,
+        created_at: transaction.created_at,
       })) as Transaction[];
     },
   });
@@ -73,7 +75,8 @@ const Transactions = () => {
 
     if (filterDate) {
       filtered = filtered.filter(transaction => {
-        const transactionDate = new Date(transaction.completedDate);
+        if (!transaction.completed_date) return false;
+        const transactionDate = new Date(transaction.completed_date);
         return (
           transactionDate.getFullYear() === filterDate.getFullYear() &&
           transactionDate.getMonth() === filterDate.getMonth() &&
@@ -89,9 +92,17 @@ const Transactions = () => {
     let sorted = [...filteredTransactions];
 
     if (sortOption === "date-asc") {
-      sorted.sort((a, b) => new Date(a.completedDate).getTime() - new Date(b.completedDate).getTime());
+      sorted.sort((a, b) => {
+        const dateA = a.completed_date ? new Date(a.completed_date).getTime() : 0;
+        const dateB = b.completed_date ? new Date(b.completed_date).getTime() : 0;
+        return dateA - dateB;
+      });
     } else if (sortOption === "date-desc") {
-      sorted.sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime());
+      sorted.sort((a, b) => {
+        const dateA = a.completed_date ? new Date(a.completed_date).getTime() : 0;
+        const dateB = b.completed_date ? new Date(b.completed_date).getTime() : 0;
+        return dateB - dateA;
+      });
     } else if (sortOption === "amount-asc") {
       sorted.sort((a, b) => a.amount - b.amount);
     } else if (sortOption === "amount-desc") {
@@ -100,18 +111,6 @@ const Transactions = () => {
 
     return sorted;
   }, [filteredTransactions, sortOption]);
-
-  const handleFilterTypeChange = (value: string) => {
-    setFilterType(value);
-  };
-
-  const handleFilterDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilterDescription(e.target.value);
-  };
-
-  const handleSortOptionChange = (value: string) => {
-    setSortOption(value);
-  };
 
   if (isLoading) {
     return <div className="container py-8">Loading...</div>;

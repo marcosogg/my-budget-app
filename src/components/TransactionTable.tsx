@@ -1,4 +1,3 @@
-// src/components/TransactionTable.tsx
 import { Transaction } from '@/types/transaction';
 import { format } from 'date-fns';
 import {
@@ -17,13 +16,14 @@ interface TransactionTableProps {
 
 const TransactionTable = ({ transactions }: TransactionTableProps) => {
   
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
     try {
       const date = new Date(dateStr);
       return format(date, 'dd/MM/yyyy');
     } catch (error) {
       console.error('Error parsing date:', dateStr, error);
-      return dateStr;
+      return '';
     }
   };
 
@@ -66,7 +66,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
               <TableRow key={index}>
                 <TableCell className="font-medium">{transaction.type}</TableCell>
                 <TableCell>{transaction.product}</TableCell>
-                <TableCell>{formatDate(transaction.completedDate)}</TableCell>
+                <TableCell>{formatDate(transaction.completed_date)}</TableCell>
                 <TableCell>{transaction.description}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
