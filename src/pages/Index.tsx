@@ -17,8 +17,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .order('completed_date', { ascending: false })
-        .limit(5);
+        .order('completed_date', { ascending: false });
 
       if (error) {
         toast({
