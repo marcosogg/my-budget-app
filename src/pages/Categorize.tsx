@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import CategorizedTransactionTable from '@/components/CategorizedTransactionTable';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const Categorize = () => {
   const navigate = useNavigate();
@@ -26,22 +28,12 @@ const Categorize = () => {
 
       const transactionIds = categorizedIds?.map(ct => ct.transaction_id) || [];
 
-      // If there are no categorized transactions, just get all transactions
-      if (transactionIds.length === 0) {
-        const { data, error } = await supabase
-          .from('transactions')
-          .select('*')
-          .order('completed_date', { ascending: false });
-
-        if (error) throw error;
-        return data as Transaction[];
-      }
-
-      // Then get all transactions that are not in that list
+      // Get uncategorized transactions
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .not('id', 'in', `(${transactionIds.join(',')})`)
+        .lt('amount', 0) // Only get expenses (negative amounts)
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -53,7 +45,16 @@ const Categorize = () => {
         throw error;
       }
 
-      return data as Transaction[];
+      // Create a Map to store unique descriptions
+      const uniqueDescriptions = new Map();
+      data?.forEach(transaction => {
+        const description = transaction.description;
+        if (description && !uniqueDescriptions.has(description)) {
+          uniqueDescriptions.set(description, transaction);
+        }
+      });
+
+      return Array.from(uniqueDescriptions.values()) as Transaction[];
     },
   });
 
@@ -173,8 +174,15 @@ const Categorize = () => {
           <h1 className="text-4xl font-bold mb-2">Categorize Transactions</h1>
           <p className="text-gray-600">Categorize your transactions</p>
         </div>
-        <div className="w-[100px]" /> {/* Spacer for alignment */}
+        <div className="w-[100px]" />
       </div>
+
+      <Alert>
+        <InfoIcon className="h-4 w-4" />
+        <AlertDescription>
+          Showing unique uncategorized expense transactions only. Transactions are filtered to show expenses (negative amounts) with unique descriptions.
+        </AlertDescription>
+      </Alert>
 
       {transactions.length === 0 ? (
         <div className="text-center py-12">
