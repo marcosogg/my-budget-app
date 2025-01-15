@@ -1,3 +1,4 @@
+// src/components/TransactionTable.tsx
 import { Transaction } from '@/types/transaction';
 import { format } from 'date-fns';
 import {
@@ -9,24 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { useState } from 'react';
 
 interface TransactionTableProps {
   transactions: Transaction[];
 }
 
-const ITEMS_PER_PAGE = 10;
-
 const TransactionTable = ({ transactions }: TransactionTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
   
   const formatDate = (dateStr: string) => {
     try {
@@ -58,14 +47,6 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
     return 'text-transaction-neutral';
   };
 
-  // Filter completed transactions
-  const completedTransactions = transactions.filter(t => t.state === 'COMPLETED');
-  
-  // Calculate pagination
-  const totalPages = Math.ceil(completedTransactions.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedTransactions = completedTransactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -81,7 +62,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedTransactions.map((transaction, index) => (
+            {transactions.map((transaction, index) => (
               <TableRow key={index}>
                 <TableCell className="font-medium">{transaction.type}</TableCell>
                 <TableCell>{transaction.product}</TableCell>
@@ -101,35 +82,6 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
           </TableBody>
         </Table>
       </div>
-
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
     </div>
   );
 };
