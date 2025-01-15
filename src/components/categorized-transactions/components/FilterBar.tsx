@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CategorizedTransaction, Category } from '@/types/categorization';
 import { Transaction } from '@/types/transaction';
+import { SortOption } from '../hooks/useTransactionSort';
 
 interface FilterBarProps {
   transactions: (CategorizedTransaction & { 
@@ -14,7 +15,7 @@ interface FilterBarProps {
     categories: Category 
   })[];
   onFilterChange: (type: string, value: string | Date | undefined) => void;
-  onSortChange: (value: string) => void;
+  onSortChange: (value: SortOption) => void;
   filters: {
     category: string;
     description: string;
@@ -25,7 +26,7 @@ interface FilterBarProps {
 export const FilterBar = ({ transactions, onFilterChange, onSortChange, filters }: FilterBarProps) => {
   return (
     <div className="flex flex-wrap gap-4">
-      <Select onValueChange={onSortChange}>
+      <Select onValueChange={(value: SortOption) => onSortChange(value)}>
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>

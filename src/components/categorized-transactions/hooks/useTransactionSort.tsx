@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { CategorizedTransaction, Category } from '@/types/categorization';
 import { Transaction } from '@/types/transaction';
 
-type SortOption = "date-asc" | "date-desc" | "amount-asc" | "amount-desc" | "";
+export type SortOption = "date-asc" | "date-desc" | "amount-asc" | "amount-desc" | "";
 
 export const useTransactionSort = (transactions: (CategorizedTransaction & { 
   transactions: Transaction, 
