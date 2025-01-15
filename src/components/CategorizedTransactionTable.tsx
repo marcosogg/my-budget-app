@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Category, CategorizedTransaction } from '@/types/categorization';
@@ -31,8 +31,9 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
   const [filterDescription, setFilterDescription] = useState<string>("");
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
   const [sortOption, setSortOption] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const { data: categorizedTransactions = [], isLoading, error } = useQuery({
+  const { data: categorizedTransactions = [], isLoading, error, refetch } = useQuery({
     queryKey: ['categorizedTransactions'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -55,6 +56,52 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
       })[];
     },
   });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load categories",
+        });
+        throw error;
+      }
+
+      return data as Category[];
+    },
+  });
+
+  const handleUpdateCategory = async (transactionId: string, newCategoryId: string) => {
+    try {
+      const { error } = await supabase
+        .from('categorized_transactions')
+        .update({ category_id: newCategoryId })
+        .eq('id', transactionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Category updated successfully",
+      });
+      
+      setEditingId(null);
+      refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update category",
+      });
+    }
+  };
 
   const filteredTransactions = useMemo(() => {
     let filtered = [...categorizedTransactions];
@@ -217,12 +264,33 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Currency</TableHead>
               <TableHead>Notes</TableHead>
+              <TableHead className="w-[50px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedTransactions.map((categorizedTransaction) => (
               <TableRow key={categorizedTransaction.id}>
-                <TableCell className="font-medium">{categorizedTransaction.categories.name}</TableCell>
+                <TableCell className="font-medium">
+                  {editingId === categorizedTransaction.id ? (
+                    <Select
+                      defaultValue={categorizedTransaction.category_id}
+                      onValueChange={(value) => handleUpdateCategory(categorizedTransaction.id, value)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    categorizedTransaction.categories.name
+                  )}
+                </TableCell>
                 <TableCell>{formatDate(categorizedTransaction.transactions.completed_date)}</TableCell>
                 <TableCell>{categorizedTransaction.transactions.description}</TableCell>
                 <TableCell className="text-right">
@@ -235,6 +303,15 @@ const CategorizedTransactionTable = ({}: CategorizedTransactionTableProps) => {
                 </TableCell>
                 <TableCell>{categorizedTransaction.transactions.currency}</TableCell>
                 <TableCell>{categorizedTransaction.notes}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditingId(editingId === categorizedTransaction.id ? null : categorizedTransaction.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
