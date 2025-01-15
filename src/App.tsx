@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
 import Categorize from "./pages/Categorize";
+import Categories from "./pages/analytics/Categories";
 import { supabase } from "./integrations/supabase/client";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
@@ -105,6 +106,14 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Categorize />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/analytics/categories"
+                      element={
+                        <ProtectedRoute>
+                          <Categories />
                         </ProtectedRoute>
                       }
                     />
