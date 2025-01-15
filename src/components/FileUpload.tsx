@@ -93,7 +93,8 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
 
   const clearExistingData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       console.log('Current user:', user);
       
       if (!user) {
@@ -101,18 +102,18 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         toast.error('Please sign in to manage transactions');
         return false;
       }
-
+  
       const { error } = await supabase
         .from('transactions')
         .delete()
         .eq('user_id', user.id);
-
+  
       if (error) {
         console.error('Error clearing transactions:', error);
         toast.error('Failed to clear existing transactions');
         return false;
       }
-
+  
       console.log('Successfully cleared existing transactions');
       return true;
     } catch (error) {
@@ -202,8 +203,9 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                   setIsUploading(false);
                   return;
                 }
-
-                const { data: { user } } = await supabase.auth.getUser();
+            
+                const { data: { session } } = await supabase.auth.getSession();
+                const user = session?.user;
                 console.log('Current user for transaction upload:', user);
                 
                 if (!user) {
@@ -212,7 +214,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
                   setIsUploading(false);
                   return;
                 }
-
+            
                 console.log('Preparing to save transactions for user:', user.id);
                 const { error } = await supabase.from('transactions').insert(
                   transactions.map(t => ({
@@ -280,7 +282,15 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
       'text/csv': ['.csv'],
     },
     multiple: false,
+    noClick: false,
+    noKeyboard: false,
+    noDrag: false,
+    disabled: false,
+    onDragEnter: undefined,
+    onDragOver: undefined,
+    onDragLeave: undefined
   });
+  
 
   return (
     <div
@@ -288,7 +298,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
       className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
         ${isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
     >
-      <input {...getInputProps()} />
+      <input {...getInputProps()} className="hidden" />
       {isUploading ? (
         <div className="space-y-4">
           <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
