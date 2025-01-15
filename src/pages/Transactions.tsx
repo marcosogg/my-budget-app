@@ -70,8 +70,6 @@ const Transactions = () => {
         </div>
       ) : (
         <>
-          <TransactionStats transactions={transactions} />
-          <TransactionTable transactions={transactions} />
         </>
       )}
     </div>
