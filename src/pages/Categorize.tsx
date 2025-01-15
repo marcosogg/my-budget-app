@@ -26,11 +26,22 @@ const Categorize = () => {
 
       const transactionIds = categorizedIds?.map(ct => ct.transaction_id) || [];
 
+      // If there are no categorized transactions, just get all transactions
+      if (transactionIds.length === 0) {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .order('completed_date', { ascending: false });
+
+        if (error) throw error;
+        return data as Transaction[];
+      }
+
       // Then get all transactions that are not in that list
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .not('id', 'in', `(${transactionIds.map(id => `'${id}'`).join(',')})`)
+        .not('id', 'in', transactionIds)
         .order('completed_date', { ascending: false });
 
       if (error) {
