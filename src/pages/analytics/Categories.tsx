@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/analytics/MonthPicker";
 import { CategorySummaryGrid } from "@/components/analytics/CategorySummaryGrid";
@@ -10,13 +10,16 @@ import { supabase } from "@/integrations/supabase/client";
 const Categories = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
+  // Format the date as a proper ISO timestamp for the start of the month
+  const formattedDate = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+
   const { data: totalSpending, isLoading: isTotalLoading } = useQuery({
     queryKey: ["monthly-total-spending", format(selectedDate, "yyyy-MM")],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("monthly_total_spending")
         .select("*")
-        .eq("month", format(selectedDate, "yyyy-MM"));
+        .eq("month", formattedDate);
       
       if (error) throw error;
       return data[0];
@@ -29,7 +32,7 @@ const Categories = () => {
       const { data, error } = await supabase
         .from("monthly_category_spending")
         .select("*")
-        .eq("month", format(selectedDate, "yyyy-MM"));
+        .eq("month", formattedDate);
       
       if (error) throw error;
       return data;
