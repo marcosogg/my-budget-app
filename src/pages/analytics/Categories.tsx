@@ -69,21 +69,34 @@ const Categories = () => {
       console.log("Parameters:", { month: formattedDate });
 
       try {
-        const { data, error, status } = await supabase
+        const { data: spendingData, error: spendingError, status } = await supabase
           .from("monthly_category_spending")
           .select("*")
           .eq("month", formattedDate);
 
-        console.log("Response Status:", status);
-        if (error) {
-          console.error("Query Error:", error);
-          throw error;
-        }
+        if (spendingError) throw spendingError;
 
-        console.log("Query Success - Row Count:", data?.length);
+        // Fetch tags for each category
+        const categoriesWithTags = await Promise.all(
+          (spendingData || []).map(async (category) => {
+            const { data: tagData, error: tagError } = await supabase
+              .from('category_tags')
+              .select('tags(*)')
+              .eq('category_id', category.category_id);
+
+            if (tagError) throw tagError;
+
+            return {
+              ...category,
+              tags: tagData?.map(t => t.tags) || []
+            };
+          })
+        );
+
+        console.log("Query Success - Row Count:", categoriesWithTags.length);
         console.log("Query End:", new Date().toISOString());
         console.groupEnd();
-        return data || [];
+        return categoriesWithTags || [];
       } catch (error) {
         console.error("Query Exception:", error);
         console.groupEnd();
@@ -133,6 +146,10 @@ const Categories = () => {
     }
     if (filters.maxAmount !== null && category.total_amount > filters.maxAmount) {
       return false;
+    }
+    if (filters.tags.length > 0) {
+      const categoryTagIds = category.tags?.map(t => t.id) || [];
+      return filters.tags.every(tag => categoryTagIds.includes(tag.id));
     }
     return true;
   }).sort((a, b) => {
