@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
-import Categorize from "./pages/Categorize";
 import Categories from "./pages/analytics/Categories";
 import Mappings from "./pages/Mappings";
 import { supabase } from "./integrations/supabase/client";
@@ -99,14 +98,6 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Upload />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/categorize"
-                      element={
-                        <ProtectedRoute>
-                          <Categorize />
                         </ProtectedRoute>
                       }
                     />

@@ -1,4 +1,4 @@
-import { Home, Upload, FileText, Tags, BarChart2, Map } from "lucide-react";
+import { Home, Upload, FileText, BarChart2, Map } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
@@ -27,11 +27,6 @@ const items = [
     title: "Upload",
     url: "/upload",
     icon: Upload,
-  },
-  {
-    title: "Categorize",
-    url: "/categorize",
-    icon: Tags,
   },
   {
     title: "Mappings",
