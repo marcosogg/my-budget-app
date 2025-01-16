@@ -41,8 +41,8 @@ export const TagSelect = ({
   const [open, setOpen] = useState(false);
 
   // Initialize with empty arrays and ensure type safety
-  const safeTags = (Array.isArray(tags) ? tags : []) as Tag[];
-  const safeSelectedTags = (Array.isArray(selectedTags) ? selectedTags : []) as Tag[];
+  const safeTags = Array.isArray(tags) ? tags : [];
+  const safeSelectedTags = Array.isArray(selectedTags) ? selectedTags : [];
 
   // Don't render Command component during loading
   if (isLoading) {
