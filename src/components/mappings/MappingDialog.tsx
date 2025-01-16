@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
@@ -54,7 +54,10 @@ export function MappingDialog({
           .eq("id", mapping.id);
 
         if (error) throw error;
-        toast({ title: "Mapping updated successfully" });
+        toast({ 
+          title: "Success", 
+          description: "Mapping and associated transactions have been updated" 
+        });
       } else {
         const { error } = await supabase
           .from("description_category_mappings")
@@ -65,12 +68,18 @@ export function MappingDialog({
           });
 
         if (error) throw error;
-        toast({ title: "Mapping created successfully" });
+        toast({ 
+          title: "Success", 
+          description: "New mapping created successfully" 
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["description-mappings"] });
+      // Also invalidate categorized transactions as they might have been updated
+      queryClient.invalidateQueries({ queryKey: ["categorizedTransactions"] });
       onOpenChange(false);
     } catch (error) {
+      console.error('Error saving mapping:', error);
       toast({
         title: "Error",
         description: "An error occurred while saving the mapping",
