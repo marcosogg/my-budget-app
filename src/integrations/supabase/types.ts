@@ -16,6 +16,7 @@ export type Database = {
           id: string
           is_system: boolean
           name: string
+          type: Database["public"]["Enums"]["category_type"]
           user_id: string | null
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           id?: string
           is_system?: boolean
           name: string
+          type?: Database["public"]["Enums"]["category_type"]
           user_id?: string | null
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           id?: string
           is_system?: boolean
           name?: string
+          type?: Database["public"]["Enums"]["category_type"]
           user_id?: string | null
         }
         Relationships: []
@@ -120,16 +123,76 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          total_monthly_income: number
         }
         Insert: {
           created_at?: string
           id: string
+          total_monthly_income?: number
         }
         Update: {
           created_at?: string
           id?: string
+          total_monthly_income?: number
         }
         Relationships: []
+      }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transaction_tags: {
+        Row: {
+          created_at: string
+          tag_id: string
+          transaction_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          tag_id: string
+          transaction_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          tag_id?: string
+          transaction_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_tags_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -240,7 +303,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      category_type: "expense" | "uncategorized"
     }
     CompositeTypes: {
       [_ in never]: never
