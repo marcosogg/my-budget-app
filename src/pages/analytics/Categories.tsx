@@ -10,46 +10,103 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Categories = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  // Format the date as a proper ISO timestamp for the start of the month
   const formattedDate = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+  // Total Spending Query with Debug Logging
   const { data: totalSpending, isLoading: isTotalLoading } = useQuery({
     queryKey: ["monthly-total-spending", format(selectedDate, "yyyy-MM")],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("monthly_total_spending")
-        .select("*")
-        .eq("month", formattedDate);
-      
-      if (error) throw error;
-      return data[0];
+      console.group("Total Spending Query");
+      const startTime = new Date().toISOString();
+      console.log("Query Start:", startTime);
+      console.log("Parameters:", { month: formattedDate });
+
+      try {
+        const { data, error, status } = await supabase
+          .from("monthly_total_spending")
+          .select("*")
+          .eq("month", formattedDate);
+
+        console.log("Response Status:", status);
+        if (error) {
+          console.error("Query Error:", error);
+          throw error;
+        }
+
+        console.log("Query Success - Row Count:", data?.length);
+        console.log("Query End:", new Date().toISOString());
+        console.groupEnd();
+        return data[0];
+      } catch (error) {
+        console.error("Query Exception:", error);
+        console.groupEnd();
+        throw error;
+      }
     },
   });
 
+  // Category Spending Query with Debug Logging
   const { data: categorySpending, isLoading: isCategoryLoading } = useQuery({
     queryKey: ["monthly-category-spending", format(selectedDate, "yyyy-MM")],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("monthly_category_spending")
-        .select("*")
-        .eq("month", formattedDate);
-      
-      if (error) throw error;
-      return data;
+      console.group("Category Spending Query");
+      const startTime = new Date().toISOString();
+      console.log("Query Start:", startTime);
+      console.log("Parameters:", { month: formattedDate });
+
+      try {
+        const { data, error, status } = await supabase
+          .from("monthly_category_spending")
+          .select("*")
+          .eq("month", formattedDate);
+
+        console.log("Response Status:", status);
+        if (error) {
+          console.error("Query Error:", error);
+          throw error;
+        }
+
+        console.log("Query Success - Row Count:", data?.length);
+        console.log("Query End:", new Date().toISOString());
+        console.groupEnd();
+        return data;
+      } catch (error) {
+        console.error("Query Exception:", error);
+        console.groupEnd();
+        throw error;
+      }
     },
   });
 
+  // Uncategorized Summary Query with Debug Logging
   const { data: uncategorizedSummary } = useQuery({
     queryKey: ["uncategorized-summary"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("uncategorized_summary")
-        .select("*")
-        .single();
-      
-      if (error) throw error;
-      return data;
+      console.group("Uncategorized Summary Query");
+      const startTime = new Date().toISOString();
+      console.log("Query Start:", startTime);
+
+      try {
+        const { data, error, status } = await supabase
+          .from("uncategorized_summary")
+          .select("*")
+          .single();
+
+        console.log("Response Status:", status);
+        if (error) {
+          console.error("Query Error:", error);
+          throw error;
+        }
+
+        console.log("Query Success");
+        console.log("Query End:", new Date().toISOString());
+        console.groupEnd();
+        return data;
+      } catch (error) {
+        console.error("Query Exception:", error);
+        console.groupEnd();
+        throw error;
+      }
     },
   });
 
