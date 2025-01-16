@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Euro } from "lucide-react";
+import { DollarSign, ChartBar } from "lucide-react";
 import { formatEuroAmount, formatTransactionCount } from "@/utils/formatters";
 
 interface CategorySpending {
@@ -57,17 +57,24 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg group-hover:text-primary transition-colors">
-              <Euro className="h-5 w-5 text-primary" />
+              <DollarSign className="h-5 w-5 text-primary" />
               {category.category_name}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-primary transition-colors group-hover:text-primary/90">
-              {formatEuroAmount(category.total_amount)}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-              {formatTransactionCount(category.transaction_count)} transactions
-            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-2xl font-bold text-primary transition-colors group-hover:text-primary/90">
+                  {formatEuroAmount(category.total_amount)}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <ChartBar className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {formatTransactionCount(category.transaction_count)} transactions
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       ))}
