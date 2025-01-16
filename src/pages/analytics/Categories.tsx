@@ -9,11 +9,23 @@ import { UncategorizedAlert } from "@/components/analytics/UncategorizedAlert";
 import { CategoryFilterBar } from "@/components/analytics/CategoryFilterBar";
 import { useCategoryAnalytics } from "@/hooks/useCategoryAnalytics";
 import { supabase } from "@/integrations/supabase/client";
+import { Tag } from "@/types/tags";
 
 const Categories = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { sortOption, setSortOption, filters, updateFilter, clearFilters } = useCategoryAnalytics();
   const formattedDate = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+  // Handle tag selection
+  const handleTagSelect = (tag: Tag) => {
+    const updatedTags = [...filters.tags, tag];
+    updateFilter('tags', updatedTags);
+  };
+
+  const handleTagDeselect = (tagId: string) => {
+    const updatedTags = filters.tags.filter(tag => tag.id !== tagId);
+    updateFilter('tags', updatedTags);
+  };
 
   const { data: totalSpending, isLoading: isTotalLoading } = useQuery({
     queryKey: ["monthly-total-spending", format(selectedDate, "yyyy-MM")],
@@ -164,6 +176,9 @@ const Categories = () => {
         onFilterChange={updateFilter}
         onSortChange={setSortOption}
         onClearFilters={clearFilters}
+        selectedTags={filters.tags}
+        onTagSelect={handleTagSelect}
+        onTagDeselect={handleTagDeselect}
       />
 
       <TotalSpending 
