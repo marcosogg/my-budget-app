@@ -43,7 +43,7 @@ const Mappings = () => {
             last_used:max(created_at)
           )
         `)
-        .groupBy('id, description, category_id, categories.name');
+        .order('description');  // Using order instead of groupBy
 
       if (error) {
         toast.error("Failed to load mappings");
