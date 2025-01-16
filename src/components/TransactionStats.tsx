@@ -1,15 +1,14 @@
 import { Transaction } from '@/types/transaction';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CreditCard, PiggyBank, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
+import { formatEuroDate, formatEuroAmount, formatTransactionCount } from '@/utils/formatters';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
 }
 
 const TransactionStats = ({ transactions }: TransactionStatsProps) => {
-
   const roundedTransactions = transactions.map(transaction => ({
     ...transaction,
     amount: parseFloat(transaction.amount.toFixed(1)),
@@ -28,24 +27,6 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
     creditCardRepayments: transfers.reduce((acc, curr) => acc + Math.abs(curr.amount), 0),
   };
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return format(date, 'dd/MM/yyyy');
-    } catch (error) {
-      console.error('Error parsing date:', dateStr, error);
-      return dateStr;
-    }
-  };
-
   const dates = transactions
     .map(t => new Date(t.completed_date || '').getTime())
     .sort((a, b) => a - b);
@@ -61,12 +42,16 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
         <div className="flex items-center space-x-6 text-sm">
           <div className="flex flex-col items-end">
             <span className="text-muted-foreground">First Transaction</span>
-            <span className="font-medium">{firstTransactionDate ? formatDate(firstTransactionDate.toISOString()) : 'No transactions'}</span>
+            <span className="font-medium">
+              {firstTransactionDate ? formatEuroDate(firstTransactionDate.toISOString()) : 'No transactions'}
+            </span>
           </div>
           <Separator orientation="vertical" className="h-8" />
           <div className="flex flex-col items-end">
             <span className="text-muted-foreground">Last Transaction</span>
-            <span className="font-medium">{lastTransactionDate ? formatDate(lastTransactionDate.toISOString()) : 'No transactions'}</span>
+            <span className="font-medium">
+              {lastTransactionDate ? formatEuroDate(lastTransactionDate.toISOString()) : 'No transactions'}
+            </span>
           </div>
         </div>
       </div>
@@ -85,10 +70,10 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold tracking-tight">
-                {formatAmount(stats.cardPayments.amount)}
+                {formatEuroAmount(stats.cardPayments.amount)}
               </div>
               <div className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                {stats.cardPayments.count} transactions
+                {formatTransactionCount(stats.cardPayments.count)} transactions
               </div>
             </div>
           </CardContent>
@@ -106,7 +91,7 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold tracking-tight">
-                {formatAmount(stats.savingsTotal)}
+                {formatEuroAmount(stats.savingsTotal)}
               </div>
             </div>
           </CardContent>
@@ -124,7 +109,7 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold tracking-tight">
-                {formatAmount(stats.creditCardRepayments)}
+                {formatEuroAmount(stats.creditCardRepayments)}
               </div>
             </div>
           </CardContent>
