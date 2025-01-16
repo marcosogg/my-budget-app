@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tag, CreateTagInput } from '@/types/tags';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export const useTags = () => {
   const { toast } = useToast();
@@ -30,9 +30,18 @@ export const useTags = () => {
 
   const createTag = useMutation({
     mutationFn: async (input: CreateTagInput) => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('User must be authenticated to create tags');
+      }
+
       const { data, error } = await supabase
         .from('tags')
-        .insert([{ name: input.name }])
+        .insert([{ 
+          name: input.name,
+          user_id: user.id
+        }])
         .select()
         .single();
 
