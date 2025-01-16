@@ -38,12 +38,12 @@ const Mappings = () => {
           categories (
             name
           ),
-          categorized_transactions!inner (
-            transaction_count:count(*),
+          categorized_transactions (
+            count,
             last_used:max(created_at)
           )
         `)
-        .order('description');  // Using order instead of groupBy
+        .order('description');
 
       if (error) {
         toast.error("Failed to load mappings");
@@ -55,7 +55,7 @@ const Mappings = () => {
         description: mapping.description,
         category_id: mapping.category_id,
         category_name: mapping.categories.name,
-        transaction_count: mapping.categorized_transactions[0]?.transaction_count || 0,
+        transaction_count: mapping.categorized_transactions[0]?.count || 0,
         last_used: mapping.categorized_transactions[0]?.last_used || null,
       }));
     },
