@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { format, startOfMonth } from "date-fns";
 import { MonthPicker } from "@/components/analytics/MonthPicker";
-import { CategorySummaryGrid } from "@/components/analytics/CategorySummaryGrid";
 import { TotalSpending } from "@/components/analytics/TotalSpending";
 import { UncategorizedAlert } from "@/components/analytics/UncategorizedAlert";
 import { CategoryFilterBar } from "@/components/analytics/CategoryFilterBar";
+import { CategoryList } from "@/components/analytics/CategoryList";
 import { useCategoryAnalytics } from "@/hooks/useCategoryAnalytics";
 import { useCategorySpending } from "@/hooks/useCategorySpending";
 import { useUncategorizedSummary } from "@/hooks/useUncategorizedSummary";
@@ -18,7 +18,6 @@ const Categories = () => {
   const { data: categorySpending, isLoading: isCategoryLoading } = useCategorySpending(formattedDate);
   const { data: uncategorizedSummary } = useUncategorizedSummary();
 
-  // Handle tag selection
   const handleTagSelect = (tag: Tag) => {
     const updatedTags = [...filters.tags, tag];
     updateFilter('tags', updatedTags);
@@ -29,42 +28,7 @@ const Categories = () => {
     updateFilter('tags', updatedTags);
   };
 
-  // Apply filters and sorting to category spending data
-  const filteredAndSortedCategories = categorySpending?.filter(category => {
-    if (filters.search && !category.category_name?.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false;
-    }
-    if (filters.minAmount !== null && category.total_amount < filters.minAmount) {
-      return false;
-    }
-    if (filters.maxAmount !== null && category.total_amount > filters.maxAmount) {
-      return false;
-    }
-    if (filters.tags.length > 0) {
-      const categoryTagIds = category.tags?.map(t => t.id) || [];
-      return filters.tags.every(tag => categoryTagIds.includes(tag.id));
-    }
-    return true;
-  }).sort((a, b) => {
-    if (!sortOption) return 0;
-    
-    switch (sortOption) {
-      case 'amount-asc':
-        return (a.total_amount || 0) - (b.total_amount || 0);
-      case 'amount-desc':
-        return (b.total_amount || 0) - (a.total_amount || 0);
-      case 'name-asc':
-        return (a.category_name || '').localeCompare(b.category_name || '');
-      case 'name-desc':
-        return (b.category_name || '').localeCompare(a.category_name || '');
-      case 'count-asc':
-        return (a.transaction_count || 0) - (b.transaction_count || 0);
-      case 'count-desc':
-        return (b.transaction_count || 0) - (a.transaction_count || 0);
-      default:
-        return 0;
-    }
-  }) || [];
+  const totalAmount = categorySpending?.reduce((sum, cat) => sum + (cat.total_amount || 0), 0) || 0;
 
   return (
     <div className="container py-6 space-y-6">
@@ -92,13 +56,15 @@ const Categories = () => {
       />
 
       <TotalSpending 
-        amount={filteredAndSortedCategories.reduce((sum, cat) => sum + (cat.total_amount || 0), 0)} 
+        amount={totalAmount}
         isLoading={isCategoryLoading} 
       />
 
-      <CategorySummaryGrid 
-        categories={filteredAndSortedCategories} 
-        isLoading={isCategoryLoading} 
+      <CategoryList 
+        categories={categorySpending || []}
+        isLoading={isCategoryLoading}
+        filters={filters}
+        sortOption={sortOption}
       />
     </div>
   );

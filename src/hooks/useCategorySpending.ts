@@ -3,23 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tag } from "@/types/tags";
 
 interface CategorySpending {
-  category_id: string;
   category_name: string;
   total_amount: number;
   transaction_count: number;
   type: 'expense' | 'uncategorized';
   tags?: Tag[];
-}
-
-interface MonthlySpendingResponse {
-  id: string;
-  name: string;
-  monthly_category_spending: {
-    total_amount: number;
-    transaction_count: number;
-    type: 'expense' | 'uncategorized';
-    month: string;
-  }[];
 }
 
 export const useCategorySpending = (formattedDate: string) => {
@@ -32,52 +20,47 @@ export const useCategorySpending = (formattedDate: string) => {
       console.log("Parameters:", { month: formattedDate });
 
       try {
+        // Query the monthly_category_spending view directly
         const { data: spendingData, error: spendingError } = await supabase
-          .from("categories")
-          .select(`
-            id,
-            name,
-            monthly_category_spending!inner(
-              total_amount,
-              transaction_count,
-              type,
-              month
-            )
-          `)
-          .eq('monthly_category_spending.month', formattedDate);
+          .from("monthly_category_spending")
+          .select("*")
+          .eq('month', formattedDate);
 
         if (spendingError) throw spendingError;
 
-        // Transform the data to match the expected format
-        const transformedData = (spendingData as MonthlySpendingResponse[])?.map(category => ({
-          category_id: category.id,
-          category_name: category.name,
-          total_amount: category.monthly_category_spending[0]?.total_amount || 0,
-          transaction_count: category.monthly_category_spending[0]?.transaction_count || 0,
-          type: category.monthly_category_spending[0]?.type || 'expense'
-        })) || [];
+        // Get all categories with their tags
+        const { data: categoriesWithTags, error: tagsError } = await supabase
+          .from('categories')
+          .select(`
+            name,
+            category_tags(
+              tags(*)
+            )
+          `);
 
-        // Fetch tags for each category
-        const categoriesWithTags = await Promise.all(
-          transformedData.map(async (category) => {
-            const { data: tagData, error: tagError } = await supabase
-              .from('category_tags')
-              .select('tags(*)')
-              .eq('category_id', category.category_id);
+        if (tagsError) throw tagsError;
 
-            if (tagError) throw tagError;
-
-            return {
-              ...category,
-              tags: tagData?.map(t => t.tags) || []
-            };
-          })
+        // Create a map of category names to their tags
+        const categoryTagsMap = new Map(
+          categoriesWithTags?.map(category => [
+            category.name,
+            category.category_tags?.map(ct => ct.tags) || []
+          ])
         );
 
-        console.log("Query Success - Row Count:", categoriesWithTags.length);
+        // Transform the data to include tags
+        const transformedData = spendingData?.map(spending => ({
+          category_name: spending.category_name,
+          total_amount: spending.total_amount,
+          transaction_count: spending.transaction_count,
+          type: spending.type,
+          tags: categoryTagsMap.get(spending.category_name) || []
+        })) || [];
+
+        console.log("Query Success - Row Count:", transformedData.length);
         console.log("Query End:", new Date().toISOString());
         console.groupEnd();
-        return categoriesWithTags as CategorySpending[];
+        return transformedData as CategorySpending[];
       } catch (error) {
         console.error("Query Exception:", error);
         console.groupEnd();
