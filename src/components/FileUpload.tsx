@@ -1,140 +1,18 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { parse } from 'papaparse';
 import { Transaction } from '@/types/transaction';
+import { UploadIndicator } from './upload/UploadIndicator';
+import { clearExistingData, saveTransactions } from '@/services/transactionService';
+import { parseCSV } from '@/services/csvParserService';
 
 interface FileUploadProps {
   onFileUpload: (data: Transaction[]) => void;
 }
 
-const parseCustomDate = (dateStr: string): string | null => {
-  if (!dateStr) return null;
-  
-  try {
-    console.log('Parsing date:', dateStr);
-    // Split date and time
-    const [datePart, timePart] = dateStr.split(' ');
-    if (!datePart || !timePart) {
-      console.error('Invalid date format - missing date or time part:', dateStr);
-      return null;
-    }
-
-    // Parse YYYY-MM-DD format
-    const [year, month, day] = datePart.split('-');
-    const [hours, minutes, seconds] = timePart.split(':');
-
-    if (!year || !month || !day || !hours || !minutes || !seconds) {
-      console.error('Invalid date components:', { year, month, day, hours, minutes, seconds });
-      return null;
-    }
-
-    // Validate numeric values
-    const numYear = parseInt(year);
-    const numMonth = parseInt(month);
-    const numDay = parseInt(day);
-    const numHours = parseInt(hours);
-    const numMinutes = parseInt(minutes);
-    const numSeconds = parseInt(seconds);
-
-    // Basic validation
-    if (
-      numMonth < 1 || numMonth > 12 ||
-      numDay < 1 || numDay > 31 ||
-      numHours < 0 || numHours > 23 ||
-      numMinutes < 0 || numMinutes > 59 ||
-      numSeconds < 0 || numSeconds > 59
-    ) {
-      console.error('Date components out of valid range:', {
-        year: numYear,
-        month: numMonth,
-        day: numDay,
-        hours: numHours,
-        minutes: numMinutes,
-        seconds: numSeconds
-      });
-      return null;
-    }
-
-    // Additional validation for days in month
-    const daysInMonth = new Date(numYear, numMonth, 0).getDate();
-    if (numDay > daysInMonth) {
-      console.error(`Invalid day ${numDay} for month ${numMonth}`);
-      return null;
-    }
-
-    // Create date object with all components
-    const date = new Date(
-      numYear,
-      numMonth - 1, // months are 0-based
-      numDay,
-      numHours,
-      numMinutes,
-      numSeconds
-    );
-
-    // Validate the resulting date
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date object created:', date);
-      return null;
-    }
-
-    return date.toISOString();
-  } catch (error) {
-    console.error('Error parsing date:', dateStr, error);
-    return null;
-  }
-};
-
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
-
-  const clearExistingData = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      console.log('Current user:', user);
-      
-      if (!user) {
-        console.error('No authenticated user found');
-        toast.error('Please sign in to manage transactions');
-        return false;
-      }
-
-      // First, delete categorized transactions
-      const { error: categorizedError } = await supabase
-        .from('categorized_transactions')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (categorizedError) {
-        console.error('Error clearing categorized transactions:', categorizedError);
-        toast.error('Failed to clear existing categorized transactions');
-        return false;
-      }
-
-      // Then, delete transactions
-      const { error: transactionsError } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (transactionsError) {
-        console.error('Error clearing transactions:', transactionsError);
-        toast.error('Failed to clear existing transactions');
-        return false;
-      }
-
-      console.log('Successfully cleared existing transactions and their categorizations');
-      return true;
-    } catch (error) {
-      console.error('Error in clearExistingData:', error);
-      toast.error('Failed to clear existing data');
-      return false;
-    }
-  };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) {
@@ -171,106 +49,37 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
             throw new Error('Failed to read file content');
           }
           
-          parse(text, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: (header) => {
-              const headerMap: { [key: string]: string } = {
-                'Type': 'type',
-                'Product': 'product',
-                'Started Date': 'started_date',
-                'Completed Date': 'completed_date',
-                'Description': 'description',
-                'Amount': 'amount',
-                'Fee': 'fee',
-                'Currency': 'currency',
-                'State': 'state',
-                'Balance': 'balance'
-              };
-              console.log('Transforming header:', header, 'to:', headerMap[header] || header);
-              return headerMap[header] || header;
-            },
-            transform: (value, field) => {
-              if (field === 'amount' || field === 'fee' || field === 'balance') {
-                return parseFloat(value);
-              }
-              if (field === 'completed_date' || field === 'started_date') {
-                const parsedDate = parseCustomDate(value);
-                if (!parsedDate) {
-                  console.error('Failed to parse date:', value);
-                  return null;
-                }
-                return parsedDate;
-              }
-              return value;
-            },
-            complete: async (results) => {
-              try {
-                console.log('CSV parsing complete. Row count:', results.data.length);
-                const transactions = (results.data as Transaction[])
-                  .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date);
-                console.log('Filtered completed transactions count:', transactions.length);
-                
-                if (transactions.length === 0) {
-                  toast.error('No valid completed transactions found in the CSV');
-                  setIsUploading(false);
-                  return;
-                }
-            
-                const { data: { session } } = await supabase.auth.getSession();
-                const user = session?.user;
-                console.log('Current user for transaction upload:', user);
-                
-                if (!user) {
-                  console.error('No authenticated user found during upload');
-                  toast.error('Please sign in to save transactions');
-                  setIsUploading(false);
-                  return;
-                }
-            
-                console.log('Preparing to save transactions for user:', user.id);
-                const { error } = await supabase.from('transactions').insert(
-                  transactions.map(t => ({
-                    user_id: user.id,
-                    type: t.type,
-                    product: t.product,
-                    started_date: t.started_date,
-                    completed_date: t.completed_date,
-                    description: t.description,
-                    amount: t.amount,
-                    fee: t.fee,
-                    currency: t.currency,
-                    state: t.state,
-                    balance: t.balance
-                  }))
-                );
-
-                if (error) {
-                  console.error('Error saving transactions:', error);
-                  toast.error('Failed to save transactions');
-                  setIsUploading(false);
-                  return;
-                }
-
-                console.log('Transactions saved successfully');
-                onFileUpload(transactions);
-                toast.success(`Successfully uploaded ${transactions.length} transactions!`);
-              } catch (error) {
-                console.error('Error in complete callback:', error);
-                toast.error('Failed to process transactions');
-              } finally {
-                setIsUploading(false);
-              }
-            },
-            error: (error) => {
-              console.error('CSV parsing error:', error);
-              toast.error('Failed to parse CSV file');
-              setIsUploading(false);
-            }
-          });
+          const transactions = await parseCSV(text);
+          console.log('Filtered completed transactions count:', transactions.length);
+          
+          if (transactions.length === 0) {
+            toast.error('No valid completed transactions found in the CSV');
+            setIsUploading(false);
+            return;
+          }
+      
+          const { data: { session } } = await supabase.auth.getSession();
+          const user = session?.user;
+          console.log('Current user for transaction upload:', user);
+          
+          if (!user) {
+            console.error('No authenticated user found during upload');
+            toast.error('Please sign in to save transactions');
+            setIsUploading(false);
+            return;
+          }
+      
+          console.log('Preparing to save transactions for user:', user.id);
+          const saved = await saveTransactions(transactions, user.id);
+          
+          if (saved) {
+            onFileUpload(transactions);
+            toast.success(`Successfully uploaded ${transactions.length} transactions!`);
+          }
         } catch (error) {
           console.error('Error processing file:', error);
           toast.error('Failed to process file');
+        } finally {
           setIsUploading(false);
         }
       };
@@ -294,16 +103,8 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
     accept: {
       'text/csv': ['.csv'],
     },
-    multiple: false,
-    noClick: false,
-    noKeyboard: false,
-    noDrag: false,
-    disabled: false,
-    onDragEnter: undefined,
-    onDragOver: undefined,
-    onDragLeave: undefined
+    multiple: false
   });
-  
 
   return (
     <div
@@ -312,24 +113,7 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         ${isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
     >
       <input {...getInputProps()} className="hidden" />
-      {isUploading ? (
-        <div className="space-y-4">
-          <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
-          <p className="text-lg">Processing your file...</p>
-        </div>
-      ) : (
-        <>
-          <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-          {isDragActive ? (
-            <p className="text-lg">Drop the CSV file here...</p>
-          ) : (
-            <div>
-              <p className="text-lg mb-2">Drag & drop a CSV file here, or click to select</p>
-              <p className="text-sm text-gray-500">Supports CSV files only</p>
-            </div>
-          )}
-        </>
-      )}
+      <UploadIndicator isUploading={isUploading} isDragActive={isDragActive} />
     </div>
   );
 };
