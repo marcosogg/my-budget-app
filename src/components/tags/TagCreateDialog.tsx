@@ -17,12 +17,14 @@ interface TagCreateDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onSuccess?: () => void;
 }
 
 export const TagCreateDialog = ({
   open,
   onOpenChange,
   trigger,
+  onSuccess,
 }: TagCreateDialogProps) => {
   const [name, setName] = useState('');
   const { createTag } = useTags();
@@ -34,6 +36,7 @@ export const TagCreateDialog = ({
     await createTag.mutateAsync({ name: name.trim() });
     setName('');
     onOpenChange?.(false);
+    onSuccess?.();
   };
 
   const content = (
