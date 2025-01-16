@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfMonth } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ const Categories = () => {
   const queryClient = useQueryClient();
 
   // Subscribe to real-time changes
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('Setting up real-time subscription for spending updates');
     
     const categorizedTransactionsChannel = supabase
