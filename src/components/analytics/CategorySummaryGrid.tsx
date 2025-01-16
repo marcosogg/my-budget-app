@@ -7,6 +7,7 @@ interface CategorySpending {
   category_name: string;
   total_amount: number;
   transaction_count: number;
+  type: 'expense' | 'uncategorized';  // Added type to match the new category structure
 }
 
 interface CategorySummaryGridProps {
@@ -33,11 +34,14 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
     );
   }
 
-  if (categories.length === 0) {
+  // Filter out uncategorized expenses for the main grid
+  const expenseCategories = categories.filter(cat => cat.type === 'expense');
+
+  if (expenseCategories.length === 0) {
     return (
       <Card className="border border-border/50 text-center py-8">
         <CardContent>
-          <p className="text-lg text-muted-foreground">No categories found</p>
+          <p className="text-lg text-muted-foreground">No expense categories found</p>
           <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters or selecting a different month</p>
         </CardContent>
       </Card>
@@ -46,7 +50,7 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {categories.map((category) => (
+      {expenseCategories.map((category) => (
         <Card 
           key={category.category_name} 
           className="group border border-border/50 transition-all duration-200 hover:border-primary/50 hover:shadow-md"

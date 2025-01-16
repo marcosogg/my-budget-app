@@ -22,7 +22,7 @@ export const CategoryFilterBar = ({
   return (
     <div className="flex flex-wrap gap-4 items-center mb-6">
       <Input
-        placeholder="Search categories..."
+        placeholder="Search expense categories..."
         value={filters.search}
         onChange={(e) => onFilterChange('search', e.target.value)}
         className="w-[200px]"
@@ -30,7 +30,7 @@ export const CategoryFilterBar = ({
       
       <Input
         type="number"
-        placeholder="Min amount"
+        placeholder="Min expense amount"
         value={filters.minAmount || ''}
         onChange={(e) => onFilterChange('minAmount', e.target.value ? Number(e.target.value) : null)}
         className="w-[150px]"
@@ -38,7 +38,7 @@ export const CategoryFilterBar = ({
       
       <Input
         type="number"
-        placeholder="Max amount"
+        placeholder="Max expense amount"
         value={filters.maxAmount || ''}
         onChange={(e) => onFilterChange('maxAmount', e.target.value ? Number(e.target.value) : null)}
         className="w-[150px]"
