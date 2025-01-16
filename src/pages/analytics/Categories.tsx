@@ -1,20 +1,22 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/analytics/MonthPicker";
 import { CategorySummaryGrid } from "@/components/analytics/CategorySummaryGrid";
 import { TotalSpending } from "@/components/analytics/TotalSpending";
 import { UncategorizedAlert } from "@/components/analytics/UncategorizedAlert";
 import { CategoryFilterBar } from "@/components/analytics/CategoryFilterBar";
 import { useCategoryAnalytics } from "@/hooks/useCategoryAnalytics";
-import { supabase } from "@/integrations/supabase/client";
+import { useCategorySpending } from "@/hooks/useCategorySpending";
+import { useUncategorizedSummary } from "@/hooks/useUncategorizedSummary";
 import { Tag } from "@/types/tags";
 
 const Categories = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { sortOption, setSortOption, filters, updateFilter, clearFilters } = useCategoryAnalytics();
   const formattedDate = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+  const { data: categorySpending, isLoading: isCategoryLoading } = useCategorySpending(formattedDate);
+  const { data: uncategorizedSummary } = useUncategorizedSummary();
 
   // Handle tag selection
   const handleTagSelect = (tag: Tag) => {
@@ -26,103 +28,6 @@ const Categories = () => {
     const updatedTags = filters.tags.filter(tag => tag.id !== tagId);
     updateFilter('tags', updatedTags);
   };
-
-  const { data: totalSpending, isLoading: isTotalLoading } = useQuery({
-    queryKey: ["monthly-total-spending", format(selectedDate, "yyyy-MM")],
-    queryFn: async () => {
-      console.group("Total Spending Query");
-      const startTime = new Date().toISOString();
-      console.log("Query Start:", startTime);
-      console.log("Parameters:", { month: formattedDate });
-
-      try {
-        const { data, error, status } = await supabase
-          .from("monthly_total_spending")
-          .select("*")
-          .eq("month", formattedDate);
-
-        console.log("Response Status:", status);
-        if (error) {
-          console.error("Query Error:", error);
-          throw error;
-        }
-
-        console.log("Query Success - Row Count:", data?.length);
-        console.log("Query End:", new Date().toISOString());
-        console.groupEnd();
-        return data[0];
-      } catch (error) {
-        console.error("Query Exception:", error);
-        console.groupEnd();
-        throw error;
-      }
-    },
-  });
-
-  // Category Spending Query with Debug Logging
-  const { data: categorySpending, isLoading: isCategoryLoading } = useQuery({
-    queryKey: ["monthly-category-spending", format(selectedDate, "yyyy-MM")],
-    queryFn: async () => {
-      console.group("Category Spending Query");
-      const startTime = new Date().toISOString();
-      console.log("Query Start:", startTime);
-      console.log("Parameters:", { month: formattedDate });
-
-      try {
-        // First, get the categories with their spending data
-        const { data: spendingData, error: spendingError } = await supabase
-          .from("categories")
-          .select(`
-            id,
-            name,
-            monthly_category_spending!inner(
-              total_amount,
-              transaction_count,
-              type,
-              month
-            )
-          `)
-          .eq('monthly_category_spending.month', formattedDate);
-
-        if (spendingError) throw spendingError;
-
-        // Transform the data to match the expected format
-        const transformedData = spendingData?.map(category => ({
-          category_name: category.name,
-          total_amount: category.monthly_category_spending[0]?.total_amount || 0,
-          transaction_count: category.monthly_category_spending[0]?.transaction_count || 0,
-          type: category.monthly_category_spending[0]?.type || 'expense',
-          category_id: category.id
-        })) || [];
-
-        // Fetch tags for each category
-        const categoriesWithTags = await Promise.all(
-          transformedData.map(async (category) => {
-            const { data: tagData, error: tagError } = await supabase
-              .from('category_tags')
-              .select('tags(*)')
-              .eq('category_id', category.category_id);
-
-            if (tagError) throw tagError;
-
-            return {
-              ...category,
-              tags: tagData?.map(t => t.tags) || []
-            };
-          })
-        );
-
-        console.log("Query Success - Row Count:", categoriesWithTags.length);
-        console.log("Query End:", new Date().toISOString());
-        console.groupEnd();
-        return categoriesWithTags || [];
-      } catch (error) {
-        console.error("Query Exception:", error);
-        console.groupEnd();
-        throw error;
-      }
-    },
-  });
 
   // Apply filters and sorting to category spending data
   const filteredAndSortedCategories = categorySpending?.filter(category => {
@@ -187,8 +92,8 @@ const Categories = () => {
       />
 
       <TotalSpending 
-        amount={totalSpending?.total_amount || 0} 
-        isLoading={isTotalLoading} 
+        amount={filteredAndSortedCategories.reduce((sum, cat) => sum + (cat.total_amount || 0), 0)} 
+        isLoading={isCategoryLoading} 
       />
 
       <CategorySummaryGrid 
