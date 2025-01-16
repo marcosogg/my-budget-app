@@ -90,7 +90,7 @@ const Categories = () => {
         const { data, error, status } = await supabase
           .from("uncategorized_summary")
           .select("*")
-          .single();
+          .maybeSingle();
 
         console.log("Response Status:", status);
         if (error) {
