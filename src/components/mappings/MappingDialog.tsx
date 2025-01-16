@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -50,10 +50,25 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
 
   const form = useForm<MappingFormData>({
     defaultValues: {
-      description: mapping?.description || "",
-      category_id: mapping?.category_id || "",
+      description: "",
+      category_id: "",
     },
   });
+
+  // Reset form when mapping changes
+  useEffect(() => {
+    if (mapping) {
+      form.reset({
+        description: mapping.description,
+        category_id: mapping.category_id,
+      });
+    } else {
+      form.reset({
+        description: "",
+        category_id: "",
+      });
+    }
+  }, [mapping, form]);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
