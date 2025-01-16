@@ -26,10 +26,6 @@ interface QueryResult {
   categories: {
     name: string;
   };
-  categorized_transactions: Array<{
-    count: number;
-    last_used: string | null;
-  }>;
 }
 
 const Mappings = () => {
@@ -42,7 +38,8 @@ const Mappings = () => {
   const { data: mappings, isLoading } = useQuery({
     queryKey: ["description-mappings"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get the mappings with their categories
+      const { data: mappingsData, error: mappingsError } = await supabase
         .from("description_category_mappings")
         .select(`
           id,
@@ -50,27 +47,50 @@ const Mappings = () => {
           category_id,
           categories (
             name
-          ),
-          categorized_transactions (
-            count,
-            last_used:max(created_at)
           )
         `)
         .order('description') as { data: QueryResult[] | null, error: any };
 
-      if (error) {
+      if (mappingsError) {
         toast.error("Failed to load mappings");
-        throw error;
+        throw mappingsError;
       }
 
-      return (data || []).map((mapping) => ({
-        id: mapping.id,
-        description: mapping.description,
-        category_id: mapping.category_id,
-        category_name: mapping.categories.name,
-        transaction_count: mapping.categorized_transactions[0]?.count || 0,
-        last_used: mapping.categorized_transactions[0]?.last_used || null,
+      // For each mapping, get the usage statistics from categorized_transactions
+      const mappingsWithStats = await Promise.all((mappingsData || []).map(async (mapping) => {
+        const { data: statsData, error: statsError } = await supabase
+          .from("categorized_transactions")
+          .select('id, created_at')
+          .eq('category_id', mapping.category_id);
+
+        if (statsError) {
+          console.error("Error fetching stats:", statsError);
+          return {
+            ...mapping,
+            transaction_count: 0,
+            last_used: null,
+            category_name: mapping.categories.name
+          };
+        }
+
+        const transactions = statsData || [];
+        const lastUsedDate = transactions.length > 0 
+          ? transactions.reduce((latest, curr) => 
+              latest.created_at > curr.created_at ? latest : curr
+            ).created_at
+          : null;
+
+        return {
+          id: mapping.id,
+          description: mapping.description,
+          category_id: mapping.category_id,
+          category_name: mapping.categories.name,
+          transaction_count: transactions.length,
+          last_used: lastUsedDate
+        };
       }));
+
+      return mappingsWithStats;
     },
   });
 
