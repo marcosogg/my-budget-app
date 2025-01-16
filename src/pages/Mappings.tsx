@@ -13,7 +13,7 @@ interface Mapping {
   category_id: string;
   category_name: string;
   transaction_count: number;
-  last_used: string | null;
+  last_used_date: string | null;
 }
 
 const Mappings = () => {
@@ -23,41 +23,46 @@ const Mappings = () => {
   const [mappingToDelete, setMappingToDelete] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: mappings, isLoading } = useQuery({
+  const { data: mappings, isLoading, error } = useQuery({
     queryKey: ["description-mappings"],
     queryFn: async () => {
-      const { data: mappingsData, error } = await supabase
+      console.log("Fetching mapping statistics...");
+      const { data: mappingsData, error: fetchError } = await supabase
         .from("mapping_statistics")
         .select("*")
         .order('description');
 
-      if (error) {
-        toast.error("Failed to load mappings");
-        throw error;
+      if (fetchError) {
+        console.error("Error fetching mappings:", fetchError);
+        throw new Error("Failed to load mappings");
       }
 
+      console.log("Received mapping data:", mappingsData);
       return mappingsData?.map(mapping => ({
         id: mapping.id,
         description: mapping.description,
         category_id: mapping.category_id,
         category_name: mapping.category_name,
         transaction_count: Number(mapping.transaction_count),
-        last_used: mapping.last_used_date
+        last_used_date: mapping.last_used_date
       })) || [];
     },
   });
 
   const handleEdit = (mapping: Mapping) => {
+    console.log("Editing mapping:", mapping);
     setSelectedMapping(mapping);
     setIsAddEditOpen(true);
   };
 
   const handleDelete = (mappingId: string) => {
+    console.log("Deleting mapping:", mappingId);
     setMappingToDelete(mappingId);
     setIsDeleteOpen(true);
   };
 
   const handleAddNew = () => {
+    console.log("Adding new mapping");
     setSelectedMapping(undefined);
     setIsAddEditOpen(true);
   };
@@ -66,10 +71,6 @@ const Mappings = () => {
     mapping.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     mapping.category_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="container py-6 space-y-6">
@@ -81,6 +82,8 @@ const Mappings = () => {
 
       <MappingTable
         mappings={filteredMappings || []}
+        isLoading={isLoading}
+        error={error instanceof Error ? error : null}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
