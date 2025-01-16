@@ -33,6 +33,17 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
     );
   }
 
+  if (categories.length === 0) {
+    return (
+      <Card className="border border-border/50 text-center py-8">
+        <CardContent>
+          <p className="text-lg text-muted-foreground">No categories found</p>
+          <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters or selecting a different month</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => (
