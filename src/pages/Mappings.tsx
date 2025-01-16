@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Edit, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MappingDialog } from "@/components/mappings/MappingDialog";
 import { DeleteMappingDialog } from "@/components/mappings/DeleteMappingDialog";
-import { JsonMappingUpload } from "@/components/mappings/JsonMappingUpload";
-import { Input } from "@/components/ui/input";
+import { MappingTable } from "@/components/mappings/MappingTable";
+import { MappingHeader } from "@/components/mappings/MappingHeader";
 import { toast } from "sonner";
 
 interface Mapping {
@@ -120,70 +117,17 @@ const Mappings = () => {
 
   return (
     <div className="container py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Description Mappings</h1>
-        <div className="flex gap-4">
-          <JsonMappingUpload />
-          <Button onClick={handleAddNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Mapping
-          </Button>
-        </div>
-      </div>
+      <MappingHeader
+        onAddNew={handleAddNew}
+        searchTerm={searchTerm}
+        onSearchChange={(value) => setSearchTerm(value)}
+      />
 
-      <div className="flex items-center space-x-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search mappings..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Description</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="text-right">Transactions</TableHead>
-            <TableHead>Last Used</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredMappings?.map((mapping) => (
-            <TableRow key={mapping.id}>
-              <TableCell>{mapping.description}</TableCell>
-              <TableCell>{mapping.category_name}</TableCell>
-              <TableCell className="text-right">{mapping.transaction_count}</TableCell>
-              <TableCell>
-                {mapping.last_used 
-                  ? new Date(mapping.last_used).toLocaleDateString()
-                  : 'Never'}
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(mapping)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(mapping.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <MappingTable
+        mappings={filteredMappings || []}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       <MappingDialog
         open={isAddEditOpen}
