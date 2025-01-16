@@ -16,6 +16,7 @@ interface CategoryFilterBarProps {
   selectedTags: Tag[];
   onTagSelect: (tag: Tag) => void;
   onTagDeselect: (tagId: string) => void;
+  onCreateTagClick: () => void;
 }
 
 export const CategoryFilterBar = ({
@@ -27,6 +28,7 @@ export const CategoryFilterBar = ({
   selectedTags,
   onTagSelect,
   onTagDeselect,
+  onCreateTagClick,
 }: CategoryFilterBarProps) => {
   const { tags, isLoading: isLoadingTags } = useTags();
 
@@ -86,6 +88,7 @@ export const CategoryFilterBar = ({
             selectedTags={selectedTags}
             onTagSelect={onTagSelect}
             onTagDeselect={onTagDeselect}
+            onCreateClick={onCreateTagClick}
             className="w-[250px]"
           />
         </div>

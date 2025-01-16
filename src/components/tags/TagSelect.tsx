@@ -54,20 +54,43 @@ export const TagSelect = ({
         <PopoverContent className="w-[300px] p-0">
           <Command>
             <CommandInput placeholder="Search tags..." />
-            <CommandEmpty>
-              No tags found.
-              {onCreateClick && (
-                <Button
-                  variant="ghost"
-                  className="mt-2 w-full justify-start"
-                  onClick={() => {
-                    setOpen(false);
-                    onCreateClick();
-                  }}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create new tag
-                </Button>
+            <CommandEmpty className="p-4">
+              {tags.length === 0 ? (
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">No tags exist yet.</p>
+                  {onCreateClick && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setOpen(false);
+                        onCreateClick();
+                      }}
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create your first tag
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">No tags found.</p>
+                  {onCreateClick && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setOpen(false);
+                        onCreateClick();
+                      }}
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create new tag
+                    </Button>
+                  )}
+                </div>
               )}
             </CommandEmpty>
             <ScrollArea className="h-[200px]">
