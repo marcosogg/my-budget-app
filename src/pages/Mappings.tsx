@@ -16,15 +16,6 @@ interface Mapping {
   last_used: string | null;
 }
 
-interface QueryResult {
-  id: string;
-  description: string;
-  category_id: string;
-  categories: {
-    name: string;
-  };
-}
-
 const Mappings = () => {
   const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>();
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
@@ -35,59 +26,24 @@ const Mappings = () => {
   const { data: mappings, isLoading } = useQuery({
     queryKey: ["description-mappings"],
     queryFn: async () => {
-      // First, get the mappings with their categories
-      const { data: mappingsData, error: mappingsError } = await supabase
-        .from("description_category_mappings")
-        .select(`
-          id,
-          description,
-          category_id,
-          categories (
-            name
-          )
-        `)
-        .order('description') as { data: QueryResult[] | null, error: any };
+      const { data: mappingsData, error } = await supabase
+        .from("mapping_statistics")
+        .select("*")
+        .order('description');
 
-      if (mappingsError) {
+      if (error) {
         toast.error("Failed to load mappings");
-        throw mappingsError;
+        throw error;
       }
 
-      // For each mapping, get the usage statistics from categorized_transactions
-      const mappingsWithStats = await Promise.all((mappingsData || []).map(async (mapping) => {
-        const { data: statsData, error: statsError } = await supabase
-          .from("categorized_transactions")
-          .select('id, created_at')
-          .eq('category_id', mapping.category_id);
-
-        if (statsError) {
-          console.error("Error fetching stats:", statsError);
-          return {
-            ...mapping,
-            transaction_count: 0,
-            last_used: null,
-            category_name: mapping.categories.name
-          };
-        }
-
-        const transactions = statsData || [];
-        const lastUsedDate = transactions.length > 0 
-          ? transactions.reduce((latest, curr) => 
-              latest.created_at > curr.created_at ? latest : curr
-            ).created_at
-          : null;
-
-        return {
-          id: mapping.id,
-          description: mapping.description,
-          category_id: mapping.category_id,
-          category_name: mapping.categories.name,
-          transaction_count: transactions.length,
-          last_used: lastUsedDate
-        };
-      }));
-
-      return mappingsWithStats;
+      return mappingsData?.map(mapping => ({
+        id: mapping.id,
+        description: mapping.description,
+        category_id: mapping.category_id,
+        category_name: mapping.category_name,
+        transaction_count: Number(mapping.transaction_count),
+        last_used: mapping.last_used_date
+      })) || [];
     },
   });
 
