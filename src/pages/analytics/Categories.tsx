@@ -69,16 +69,35 @@ const Categories = () => {
       console.log("Parameters:", { month: formattedDate });
 
       try {
-        const { data: spendingData, error: spendingError, status } = await supabase
-          .from("monthly_category_spending")
-          .select("*")
-          .eq("month", formattedDate);
+        // First, get the categories with their spending data
+        const { data: spendingData, error: spendingError } = await supabase
+          .from("categories")
+          .select(`
+            id,
+            name,
+            monthly_category_spending!inner(
+              total_amount,
+              transaction_count,
+              type,
+              month
+            )
+          `)
+          .eq('monthly_category_spending.month', formattedDate);
 
         if (spendingError) throw spendingError;
 
+        // Transform the data to match the expected format
+        const transformedData = spendingData?.map(category => ({
+          category_name: category.name,
+          total_amount: category.monthly_category_spending[0]?.total_amount || 0,
+          transaction_count: category.monthly_category_spending[0]?.transaction_count || 0,
+          type: category.monthly_category_spending[0]?.type || 'expense',
+          category_id: category.id
+        })) || [];
+
         // Fetch tags for each category
         const categoriesWithTags = await Promise.all(
-          (spendingData || []).map(async (category) => {
+          transformedData.map(async (category) => {
             const { data: tagData, error: tagError } = await supabase
               .from('category_tags')
               .select('tags(*)')
@@ -97,37 +116,6 @@ const Categories = () => {
         console.log("Query End:", new Date().toISOString());
         console.groupEnd();
         return categoriesWithTags || [];
-      } catch (error) {
-        console.error("Query Exception:", error);
-        console.groupEnd();
-        throw error;
-      }
-    },
-  });
-
-  const { data: uncategorizedSummary } = useQuery({
-    queryKey: ["uncategorized-summary"],
-    queryFn: async () => {
-      console.group("Uncategorized Summary Query");
-      const startTime = new Date().toISOString();
-      console.log("Query Start:", startTime);
-
-      try {
-        const { data, error, status } = await supabase
-          .from("uncategorized_summary")
-          .select("*")
-          .maybeSingle();
-
-        console.log("Response Status:", status);
-        if (error) {
-          console.error("Query Error:", error);
-          throw error;
-        }
-
-        console.log("Query Success");
-        console.log("Query End:", new Date().toISOString());
-        console.groupEnd();
-        return data;
       } catch (error) {
         console.error("Query Exception:", error);
         console.groupEnd();
