@@ -17,6 +17,7 @@ import {
 import { Tag } from '@/types/tags';
 import { TagBadge } from './TagBadge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TagSelectProps {
   tags: Tag[];
@@ -25,26 +26,33 @@ interface TagSelectProps {
   onTagDeselect: (tagId: string) => void;
   onCreateClick?: () => void;
   className?: string;
+  isLoading?: boolean;
 }
 
 export const TagSelect = ({
-  tags = [], // Provide default empty array
-  selectedTags = [], // Provide default empty array
+  tags,
+  selectedTags,
   onTagSelect,
   onTagDeselect,
   onCreateClick,
   className,
+  isLoading = false,
 }: TagSelectProps) => {
   const [open, setOpen] = useState(false);
 
-  // Ensure we always have arrays, even if props are undefined
+  // Ensure we have valid arrays even during loading
   const safeTags = Array.isArray(tags) ? tags : [];
   const safeSelectedTags = Array.isArray(selectedTags) ? selectedTags : [];
 
-  // Early return for invalid data state to prevent Command component issues
-  const renderContent = () => {
-    if (!Array.isArray(safeTags)) {
-      return null;
+  const renderCommandContent = () => {
+    if (isLoading) {
+      return (
+        <div className="p-4 space-y-3">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      );
     }
 
     return (
@@ -130,13 +138,20 @@ export const TagSelect = ({
             role="combobox"
             aria-expanded={open}
             className="justify-between"
+            disabled={isLoading}
           >
-            Select tags...
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            {isLoading ? (
+              <Skeleton className="h-4 w-[100px]" />
+            ) : (
+              <>
+                Select tags...
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0">
-          {renderContent()}
+          {renderCommandContent()}
         </PopoverContent>
       </Popover>
 

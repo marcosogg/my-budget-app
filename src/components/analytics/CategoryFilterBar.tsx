@@ -90,6 +90,7 @@ export const CategoryFilterBar = ({
             onTagDeselect={onTagDeselect}
             onCreateClick={onCreateTagClick}
             className="w-[250px]"
+            isLoading={isLoadingTags}
           />
         </div>
 
