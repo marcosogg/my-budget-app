@@ -102,19 +102,32 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
         toast.error('Please sign in to manage transactions');
         return false;
       }
-  
-      const { error } = await supabase
+
+      // First, delete categorized transactions
+      const { error: categorizedError } = await supabase
+        .from('categorized_transactions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (categorizedError) {
+        console.error('Error clearing categorized transactions:', categorizedError);
+        toast.error('Failed to clear existing categorized transactions');
+        return false;
+      }
+
+      // Then, delete transactions
+      const { error: transactionsError } = await supabase
         .from('transactions')
         .delete()
         .eq('user_id', user.id);
-  
-      if (error) {
-        console.error('Error clearing transactions:', error);
+
+      if (transactionsError) {
+        console.error('Error clearing transactions:', transactionsError);
         toast.error('Failed to clear existing transactions');
         return false;
       }
-  
-      console.log('Successfully cleared existing transactions');
+
+      console.log('Successfully cleared existing transactions and their categorizations');
       return true;
     } catch (error) {
       console.error('Error in clearExistingData:', error);
