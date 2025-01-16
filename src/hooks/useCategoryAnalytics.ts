@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Tag } from '@/types/tags';
 
 export type SortOption = 'amount-asc' | 'amount-desc' | 'name-asc' | 'name-desc' | 'count-asc' | 'count-desc';
 
@@ -7,7 +6,6 @@ export interface CategoryFilters {
   search: string;
   minAmount: number | null;
   maxAmount: number | null;
-  tags: Tag[];
 }
 
 export const useCategoryAnalytics = () => {
@@ -16,10 +14,9 @@ export const useCategoryAnalytics = () => {
     search: '',
     minAmount: null,
     maxAmount: null,
-    tags: [],
   });
 
-  const updateFilter = (key: keyof CategoryFilters, value: string | number | null | Tag[]) => {
+  const updateFilter = (key: keyof CategoryFilters, value: string | number | null) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
@@ -31,7 +28,6 @@ export const useCategoryAnalytics = () => {
       search: '',
       minAmount: null,
       maxAmount: null,
-      tags: [],
     });
     setSortOption(null);
   };

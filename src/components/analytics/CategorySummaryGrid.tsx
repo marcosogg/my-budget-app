@@ -1,16 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, ChartBar, Tag } from "lucide-react";
+import { DollarSign, ChartBar } from "lucide-react";
 import { formatEuroAmount, formatTransactionCount } from "@/utils/formatters";
-import { Tag as TagType } from "@/types/tags";
-import { TagBadge } from "@/components/tags/TagBadge";
 
 interface CategorySpending {
   category_name: string;
   total_amount: number;
   transaction_count: number;
   type: 'expense' | 'uncategorized';
-  tags?: TagType[];
 }
 
 interface CategorySummaryGridProps {
@@ -77,18 +74,6 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
                   </p>
                 </div>
               </div>
-              
-              {category.tags && category.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <div className="flex items-center gap-1 w-full text-sm text-muted-foreground mb-1">
-                    <Tag className="h-4 w-4" />
-                    <span>Tags:</span>
-                  </div>
-                  {category.tags.map((tag) => (
-                    <TagBadge key={tag.id} tag={tag} />
-                  ))}
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>

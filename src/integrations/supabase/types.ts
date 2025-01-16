@@ -84,42 +84,6 @@ export type Database = {
           },
         ]
       }
-      category_tags: {
-        Row: {
-          category_id: string
-          created_at: string
-          tag_id: string
-          user_id: string
-        }
-        Insert: {
-          category_id: string
-          created_at?: string
-          tag_id: string
-          user_id: string
-        }
-        Update: {
-          category_id?: string
-          created_at?: string
-          tag_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "category_tags_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "category_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       description_category_mappings: {
         Row: {
           category_id: string
