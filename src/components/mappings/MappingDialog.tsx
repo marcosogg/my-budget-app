@@ -77,13 +77,6 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
         throw new Error("User not authenticated");
       }
 
-      const queryOptions = {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      };
-
       if (mapping) {
         const { error } = await supabase
           .from("description_category_mappings")
@@ -91,7 +84,7 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
             description: data.description,
             category_id: data.category_id,
             updated_at: new Date().toISOString(),
-          }, queryOptions)
+          })
           .eq("id", mapping.id);
 
         if (error) throw error;
@@ -103,7 +96,7 @@ export function MappingDialog({ open, onOpenChange, mapping }: MappingDialogProp
             description: data.description,
             category_id: data.category_id,
             user_id: user.id,
-          }, queryOptions);
+          });
 
         if (error) throw error;
         toast({ title: "Mapping created successfully" });
