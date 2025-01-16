@@ -34,19 +34,23 @@ export const CategorySummaryGrid = ({ categories, isLoading }: CategorySummaryGr
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => (
-        <Card key={category.category_name}>
+        <Card key={category.category_name} className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <DollarSign className="h-5 w-5 text-primary" />
               {category.category_name}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
-              ${category.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <p className="text-2xl font-bold text-primary">
+              {new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+              }).format(category.total_amount)}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {category.transaction_count} transactions
+            <p className="text-sm text-muted-foreground mt-1">
+              {new Intl.NumberFormat('de-DE').format(category.transaction_count)} transactions
             </p>
           </CardContent>
         </Card>

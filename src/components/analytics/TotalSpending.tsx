@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EuroIcon } from "lucide-react";
 
 interface TotalSpendingProps {
   amount: number;
@@ -11,7 +12,10 @@ export const TotalSpending = ({ amount, isLoading }: TotalSpendingProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Total Spending</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <EuroIcon className="h-5 w-5" />
+            Total Spending
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-8 w-24" />
@@ -21,13 +25,20 @@ export const TotalSpending = ({ amount, isLoading }: TotalSpendingProps) => {
   }
 
   return (
-    <Card>
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
-        <CardTitle>Total Spending</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <EuroIcon className="h-5 w-5 text-primary" />
+          Total Spending
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-3xl font-bold">
-          ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <p className="text-3xl font-bold text-primary">
+          {new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR',
+            minimumFractionDigits: 2,
+          }).format(amount)}
         </p>
       </CardContent>
     </Card>
