@@ -270,6 +270,7 @@ export type Database = {
           month: string | null
           total_amount: number | null
           transaction_count: number | null
+          type: Database["public"]["Enums"]["category_type"] | null
           user_id: string | null
         }
         Relationships: []

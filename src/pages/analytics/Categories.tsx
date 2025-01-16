@@ -71,7 +71,7 @@ const Categories = () => {
         console.log("Query Success - Row Count:", data?.length);
         console.log("Query End:", new Date().toISOString());
         console.groupEnd();
-        return data;
+        return data || [];
       } catch (error) {
         console.error("Query Exception:", error);
         console.groupEnd();
@@ -80,7 +80,6 @@ const Categories = () => {
     },
   });
 
-  // Uncategorized Summary Query with Debug Logging
   const { data: uncategorizedSummary } = useQuery({
     queryKey: ["uncategorized-summary"],
     queryFn: async () => {

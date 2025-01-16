@@ -7,7 +7,7 @@ interface CategorySpending {
   category_name: string;
   total_amount: number;
   transaction_count: number;
-  type: 'expense' | 'uncategorized';  // Added type to match the new category structure
+  type: 'expense' | 'uncategorized';
 }
 
 interface CategorySummaryGridProps {
