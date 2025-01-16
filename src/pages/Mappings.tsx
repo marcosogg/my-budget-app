@@ -19,6 +19,19 @@ interface Mapping {
   last_used: string | null;
 }
 
+interface QueryResult {
+  id: string;
+  description: string;
+  category_id: string;
+  categories: {
+    name: string;
+  };
+  categorized_transactions: Array<{
+    count: number;
+    last_used: string | null;
+  }>;
+}
+
 const Mappings = () => {
   const [selectedMapping, setSelectedMapping] = useState<Mapping | undefined>();
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
@@ -43,14 +56,14 @@ const Mappings = () => {
             last_used:max(created_at)
           )
         `)
-        .order('description');
+        .order('description') as { data: QueryResult[] | null, error: any };
 
       if (error) {
         toast.error("Failed to load mappings");
         throw error;
       }
 
-      return data.map((mapping) => ({
+      return (data || []).map((mapping) => ({
         id: mapping.id,
         description: mapping.description,
         category_id: mapping.category_id,
