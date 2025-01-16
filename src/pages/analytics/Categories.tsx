@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, startOfMonth } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/analytics/MonthPicker";
@@ -9,11 +9,43 @@ import { UncategorizedAlert } from "@/components/analytics/UncategorizedAlert";
 import { CategoryFilterBar } from "@/components/analytics/CategoryFilterBar";
 import { useCategoryAnalytics } from "@/hooks/useCategoryAnalytics";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Categories = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { sortOption, setSortOption, filters, updateFilter, clearFilters } = useCategoryAnalytics();
   const formattedDate = format(startOfMonth(selectedDate), "yyyy-MM-dd'T'HH:mm:ss'Z'");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Subscribe to real-time changes
+  React.useEffect(() => {
+    console.log('Setting up real-time subscription for spending updates');
+    
+    const categorizedTransactionsChannel = supabase
+      .channel('spending-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categorized_transactions'
+        },
+        () => {
+          console.log('Categorized transaction changed, invalidating queries');
+          queryClient.invalidateQueries({ queryKey: ['monthly-total-spending'] });
+          queryClient.invalidateQueries({ queryKey: ['monthly-category-spending'] });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
+
+    return () => {
+      console.log('Cleaning up real-time subscription');
+      categorizedTransactionsChannel.unsubscribe();
+    };
+  }, [queryClient]);
 
   const { data: totalSpending, isLoading: isTotalLoading } = useQuery({
     queryKey: ["monthly-total-spending", format(selectedDate, "yyyy-MM")],
@@ -32,6 +64,11 @@ const Categories = () => {
         console.log("Response Status:", status);
         if (error) {
           console.error("Query Error:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load total spending data",
+          });
           throw error;
         }
 
@@ -47,7 +84,6 @@ const Categories = () => {
     },
   });
 
-  // Category Spending Query with Debug Logging
   const { data: categorySpending, isLoading: isCategoryLoading } = useQuery({
     queryKey: ["monthly-category-spending", format(selectedDate, "yyyy-MM")],
     queryFn: async () => {
@@ -65,6 +101,11 @@ const Categories = () => {
         console.log("Response Status:", status);
         if (error) {
           console.error("Query Error:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load category spending data",
+          });
           throw error;
         }
 
@@ -96,6 +137,11 @@ const Categories = () => {
         console.log("Response Status:", status);
         if (error) {
           console.error("Query Error:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load uncategorized summary",
+          });
           throw error;
         }
 
