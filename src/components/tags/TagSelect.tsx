@@ -28,14 +28,18 @@ interface TagSelectProps {
 }
 
 export const TagSelect = ({
-  tags,
-  selectedTags,
+  tags = [], // Provide default empty array
+  selectedTags = [], // Provide default empty array
   onTagSelect,
   onTagDeselect,
   onCreateClick,
   className,
 }: TagSelectProps) => {
   const [open, setOpen] = useState(false);
+
+  // Ensure tags is always an array
+  const safeTags = Array.isArray(tags) ? tags : [];
+  const safeSelectedTags = Array.isArray(selectedTags) ? selectedTags : [];
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -55,7 +59,7 @@ export const TagSelect = ({
           <Command>
             <CommandInput placeholder="Search tags..." />
             <CommandEmpty className="p-4">
-              {tags.length === 0 ? (
+              {safeTags.length === 0 ? (
                 <div className="text-center space-y-2">
                   <p className="text-sm text-muted-foreground">No tags exist yet.</p>
                   {onCreateClick && (
@@ -95,8 +99,8 @@ export const TagSelect = ({
             </CommandEmpty>
             <ScrollArea className="h-[200px]">
               <CommandGroup>
-                {tags.map((tag) => {
-                  const isSelected = selectedTags.some((t) => t.id === tag.id);
+                {safeTags.map((tag) => {
+                  const isSelected = safeSelectedTags.some((t) => t.id === tag.id);
                   return (
                     <CommandItem
                       key={tag.id}
@@ -125,9 +129,9 @@ export const TagSelect = ({
         </PopoverContent>
       </Popover>
 
-      {selectedTags.length > 0 && (
+      {safeSelectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {selectedTags.map((tag) => (
+          {safeSelectedTags.map((tag) => (
             <TagBadge
               key={tag.id}
               tag={tag}
