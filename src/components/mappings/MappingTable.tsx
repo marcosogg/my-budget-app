@@ -33,9 +33,11 @@ export function MappingTable({ mappings, onEdit, onDelete }: MappingTableProps) 
       <TableBody>
         {mappings?.map((mapping) => (
           <TableRow key={mapping.id}>
-            <TableCell>{mapping.description}</TableCell>
+            <TableCell className="font-medium">{mapping.description}</TableCell>
             <TableCell>{mapping.category_name}</TableCell>
-            <TableCell className="text-right">{mapping.transaction_count}</TableCell>
+            <TableCell className="text-right">
+              {new Intl.NumberFormat('de-DE').format(mapping.transaction_count)}
+            </TableCell>
             <TableCell>
               {mapping.last_used 
                 ? formatEuroDate(mapping.last_used)
