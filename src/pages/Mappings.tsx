@@ -22,6 +22,7 @@ const Mappings = () => {
   const [mappingToDelete, setMappingToDelete] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [showUncategorizedOnly, setShowUncategorizedOnly] = useState(false);
 
   const { data: mappings, isLoading, error } = useQuery({
     queryKey: ["description-mappings"],
@@ -71,11 +72,10 @@ const Mappings = () => {
     const matchesSearch = mapping.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mapping.category_name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (showActiveOnly) {
-      return matchesSearch && mapping.transaction_count > 0;
-    }
+    const matchesActive = !showActiveOnly || mapping.transaction_count > 0;
+    const matchesUncategorized = !showUncategorizedOnly || mapping.category_name === 'Uncategorized';
     
-    return matchesSearch;
+    return matchesSearch && matchesActive && matchesUncategorized;
   });
 
   return (
@@ -86,6 +86,8 @@ const Mappings = () => {
         onSearchChange={(value) => setSearchTerm(value)}
         showActiveOnly={showActiveOnly}
         onShowActiveChange={setShowActiveOnly}
+        showUncategorizedOnly={showUncategorizedOnly}
+        onShowUncategorizedChange={setShowUncategorizedOnly}
       />
 
       <MappingTable

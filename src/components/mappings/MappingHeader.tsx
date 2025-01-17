@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Filter } from "lucide-react";
 import { JsonMappingUpload } from "./JsonMappingUpload";
 import { Toggle } from "@/components/ui/toggle";
 
@@ -10,6 +10,8 @@ interface MappingHeaderProps {
   onSearchChange: (value: string) => void;
   showActiveOnly: boolean;
   onShowActiveChange: (value: boolean) => void;
+  showUncategorizedOnly: boolean;
+  onShowUncategorizedChange: (value: boolean) => void;
 }
 
 export function MappingHeader({ 
@@ -17,7 +19,9 @@ export function MappingHeader({
   searchTerm, 
   onSearchChange,
   showActiveOnly,
-  onShowActiveChange 
+  onShowActiveChange,
+  showUncategorizedOnly,
+  onShowUncategorizedChange
 }: MappingHeaderProps) {
   return (
     <>
@@ -42,14 +46,25 @@ export function MappingHeader({
             className="max-w-sm"
           />
         </div>
-        <Toggle
-          pressed={showActiveOnly}
-          onPressedChange={onShowActiveChange}
-          className="gap-2"
-          aria-label="Toggle active mappings"
-        >
-          <span className="text-sm">Show Active Only</span>
-        </Toggle>
+        <div className="flex gap-4">
+          <Toggle
+            pressed={showActiveOnly}
+            onPressedChange={onShowActiveChange}
+            className="gap-2"
+            aria-label="Toggle active mappings"
+          >
+            <span className="text-sm">Show Active Only</span>
+          </Toggle>
+          <Toggle
+            pressed={showUncategorizedOnly}
+            onPressedChange={onShowUncategorizedChange}
+            className="gap-2"
+            aria-label="Toggle uncategorized mappings"
+          >
+            <Filter className="h-4 w-4" />
+            <span className="text-sm">Show Uncategorized Only</span>
+          </Toggle>
+        </div>
       </div>
     </>
   );
