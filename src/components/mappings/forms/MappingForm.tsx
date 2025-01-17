@@ -47,6 +47,7 @@ export function MappingForm({
       const { data, error } = await supabase
         .from("categories")
         .select("id, name")
+        .or('is_system.eq.true,name.neq.Uncategorized')
         .order("name");
 
       if (error) throw error;
