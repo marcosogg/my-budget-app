@@ -3,16 +3,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/types/categorization';
 import { useToast } from '@/components/ui/use-toast';
 
-export const useCategories = () => {
+interface UseCategoriesOptions {
+  includeUncategorized?: boolean;
+  onlyExpenses?: boolean;
+}
+
+export const useCategories = (options: UseCategoriesOptions = {}) => {
   const { toast } = useToast();
+  const { includeUncategorized = true, onlyExpenses = false } = options;
 
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', { includeUncategorized, onlyExpenses }],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('categories')
         .select('*')
         .order('display_order', { ascending: true });
+
+      if (!includeUncategorized) {
+        query = query.neq('type', 'uncategorized');
+      }
+
+      if (onlyExpenses) {
+        query = query.eq('type', 'expense');
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
@@ -25,5 +41,7 @@ export const useCategories = () => {
 
       return data as Category[];
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 };

@@ -7,10 +7,17 @@ import { Button } from '@/components/ui/button';
 import { LogOut, Upload, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
+import { useCategories } from '@/hooks/useCategories';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Use the enhanced categories hook
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories({
+    onlyExpenses: true
+  });
+
   const { data: transactions = [] } = useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
@@ -75,7 +82,11 @@ const Index = () => {
       </div>
 
       {transactions.length > 0 ? (
-        <TransactionStats transactions={transactions} />
+        <TransactionStats 
+          transactions={transactions} 
+          categories={categories}
+          isLoading={categoriesLoading}
+        />
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">No transactions found</p>
