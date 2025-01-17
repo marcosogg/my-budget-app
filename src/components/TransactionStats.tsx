@@ -1,4 +1,5 @@
 import { Transaction } from '@/types/transaction';
+import { Category } from '@/types/categorization';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CreditCard, PiggyBank, RefreshCw } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -7,9 +8,11 @@ import { useNavigate } from 'react-router-dom';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
+  categories?: Category[];
+  isLoading?: boolean;
 }
 
-const TransactionStats = ({ transactions }: TransactionStatsProps) => {
+const TransactionStats = ({ transactions, categories = [], isLoading = false }: TransactionStatsProps) => {
   const navigate = useNavigate();
   
   const roundedTransactions = transactions.map(transaction => ({
@@ -73,8 +76,6 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
     console.log('Navigation params:', queryParams.toString());
     navigate(`/transactions?${queryParams.toString()}`);
   };
-
-  // ... keep existing code (JSX for the component UI)
 
   return (
     <div className="space-y-8">

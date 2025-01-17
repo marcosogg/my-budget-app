@@ -42,6 +42,6 @@ export const useCategories = (options: UseCategoriesOptions = {}) => {
       return data as Category[];
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    cacheTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (formerly cacheTime)
   });
 };
