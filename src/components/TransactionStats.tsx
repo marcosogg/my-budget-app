@@ -32,11 +32,15 @@ const TransactionStats = ({ transactions, categories = [], isLoading = false }: 
     navigate(`/transactions?${queryParams.toString()}`);
   };
 
+  // Find expense categories for proper categorization
+  const expenseCategories = categories.filter(category => category.type === 'expense');
+
   return (
     <div className="space-y-8">
       <StatsHeader 
         firstTransactionDate={firstTransactionDate}
         lastTransactionDate={lastTransactionDate}
+        isLoading={isLoading}
       />
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -50,6 +54,7 @@ const TransactionStats = ({ transactions, categories = [], isLoading = false }: 
           iconColor="text-primary/70"
           badgeColor="primary"
           onClick={() => handleCountClick('CARD_PAYMENT')}
+          isLoading={isLoading}
         />
 
         <StatCard
@@ -62,6 +67,7 @@ const TransactionStats = ({ transactions, categories = [], isLoading = false }: 
           iconColor="text-green-500/70"
           badgeColor="green-500"
           onClick={() => handleCountClick('product', 'Savings')}
+          isLoading={isLoading}
         />
 
         <StatCard
@@ -74,6 +80,7 @@ const TransactionStats = ({ transactions, categories = [], isLoading = false }: 
           iconColor="text-blue-500/70"
           badgeColor="blue-500"
           onClick={() => handleCountClick('TRANSFER', 'Credit card repayment')}
+          isLoading={isLoading}
         />
       </div>
     </div>
