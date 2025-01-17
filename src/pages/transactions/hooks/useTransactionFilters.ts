@@ -11,19 +11,37 @@ export const useTransactionFilters = (transactions: Transaction[]) => {
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
     const typeParam = searchParams.get('type');
+    const productParam = searchParams.get('product');
+    const descriptionParam = searchParams.get('description');
 
-    if (typeParam === 'CARD_PAYMENT') {
-      filtered = filtered.filter(t => t.amount < 0 && t.type === 'CARD_PAYMENT');
-    } else if (typeParam) {
-      filtered = filtered.filter(t => t.type.toLowerCase() === typeParam.toLowerCase());
+    // Filter by type (CARD_PAYMENT or TRANSFER)
+    if (typeParam) {
+      filtered = filtered.filter(t => t.type === typeParam);
+      
+      // Additional filter for CARD_PAYMENT to only show negative amounts
+      if (typeParam === 'CARD_PAYMENT') {
+        filtered = filtered.filter(t => t.amount < 0);
+      }
+      
+      // If it's a TRANSFER with a specific description, filter by that too
+      if (typeParam === 'TRANSFER' && descriptionParam) {
+        filtered = filtered.filter(t => t.description === descriptionParam);
+      }
     }
 
+    // Filter by product (e.g., Savings)
+    if (productParam) {
+      filtered = filtered.filter(t => t.product === productParam);
+    }
+
+    // Filter by description search input
     if (filterDescription) {
       filtered = filtered.filter(transaction =>
         transaction.description?.toLowerCase().includes(filterDescription.toLowerCase())
       );
     }
 
+    // Filter by date
     if (filterDate) {
       filtered = filtered.filter(transaction => {
         if (!transaction.completed_date) return false;
