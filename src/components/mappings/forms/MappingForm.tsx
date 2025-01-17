@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { useCategories } from "@/hooks/useCategories";
 
 interface MappingFormData {
   description: string;
@@ -41,18 +40,9 @@ export function MappingForm({
     defaultValues,
   });
 
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name")
-        .or('is_system.eq.true,name.neq.Uncategorized')
-        .order("name");
-
-      if (error) throw error;
-      return data;
-    },
+  const { data: categories } = useCategories({
+    includeUncategorized: true,
+    onlyExpenses: true
   });
 
   return (
