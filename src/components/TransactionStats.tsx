@@ -3,12 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CreditCard, PiggyBank, RefreshCw } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { formatEuroDate, formatEuroAmount, formatTransactionCount } from '@/utils/formatters';
+import { useNavigate } from 'react-router-dom';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
 }
 
 const TransactionStats = ({ transactions }: TransactionStatsProps) => {
+  const navigate = useNavigate();
+  
   const roundedTransactions = transactions.map(transaction => ({
     ...transaction,
     amount: parseFloat(transaction.amount.toFixed(1)),
@@ -33,6 +36,10 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
 
   const firstTransactionDate = dates.length > 0 ? new Date(dates[0]) : null;
   const lastTransactionDate = dates.length > 0 ? new Date(dates[dates.length - 1]) : null;
+
+  const handleCountClick = (filterType: string) => {
+    navigate(`/transactions?type=${filterType}`);
+  };
 
   return (
     <div className="space-y-8">
@@ -72,9 +79,12 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
               <div className="text-3xl font-bold tracking-tight">
                 {formatEuroAmount(stats.cardPayments.amount)}
               </div>
-              <div className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+              <button
+                onClick={() => handleCountClick('CARD_PAYMENT')}
+                className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 cursor-pointer"
+              >
                 {formatTransactionCount(stats.cardPayments.count)} transactions
-              </div>
+              </button>
             </div>
           </CardContent>
         </Card>
