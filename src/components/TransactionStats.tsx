@@ -18,8 +18,8 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
   }));
 
   const payments = roundedTransactions.filter(t => t.amount < 0 && t.type === 'CARD_PAYMENT');
-  const transfers = roundedTransactions.filter(t => t.amount < 0 && t.type === 'TRANSFER' && t.description === 'Credit card repayment');
-  const savings = roundedTransactions.filter(t => t.product === 'Savings');
+  const transfers = roundedTransactions.filter(t => t.type === 'TRANSFER' && t.description === 'Credit card repayment');
+  const savings = roundedTransactions.filter(t => t.product === 'Savings' && t.amount > 0);
 
   const stats = {
     cardPayments: {
