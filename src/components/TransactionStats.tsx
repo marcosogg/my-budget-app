@@ -17,9 +17,22 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
     amount: parseFloat(transaction.amount.toFixed(1)),
   }));
 
+  // Debug logs for all transactions
+  console.log('All Transactions:', roundedTransactions);
+
   const payments = roundedTransactions.filter(t => t.amount < 0 && t.type === 'CARD_PAYMENT');
+  console.log('Card Payments:', payments);
+
   const transfers = roundedTransactions.filter(t => t.type === 'TRANSFER' && t.description === 'Credit card repayment');
+  console.log('Credit Card Repayments:', transfers);
+  console.log('All Transfers:', roundedTransactions.filter(t => t.type === 'TRANSFER'));
+  console.log('Transfers with "card" in description:', roundedTransactions.filter(t => 
+    t.type === 'TRANSFER' && t.description?.toLowerCase().includes('card')
+  ));
+
   const savings = roundedTransactions.filter(t => t.product === 'Savings' && t.amount > 0);
+  console.log('Savings Transactions:', savings);
+  console.log('All transactions with Savings product:', roundedTransactions.filter(t => t.product === 'Savings'));
 
   const stats = {
     cardPayments: {
@@ -35,6 +48,8 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
       count: transfers.length,
     },
   };
+
+  console.log('Calculated Stats:', stats);
 
   const dates = transactions
     .map(t => new Date(t.completed_date || '').getTime())
@@ -55,8 +70,11 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
       queryParams.set('description', filterValue || '');
     }
     
+    console.log('Navigation params:', queryParams.toString());
     navigate(`/transactions?${queryParams.toString()}`);
   };
+
+  // ... keep existing code (JSX for the component UI)
 
   return (
     <div className="space-y-8">
