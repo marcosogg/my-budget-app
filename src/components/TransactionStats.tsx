@@ -26,8 +26,14 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
       amount: payments.reduce((acc, curr) => acc + Math.abs(curr.amount), 0),
       count: payments.length,
     },
-    savingsTotal: savings.reduce((acc, curr) => acc + curr.amount, 0),
-    creditCardRepayments: transfers.reduce((acc, curr) => acc + Math.abs(curr.amount), 0),
+    savingsTotal: {
+      amount: savings.reduce((acc, curr) => acc + curr.amount, 0),
+      count: savings.length,
+    },
+    creditCardRepayments: {
+      amount: transfers.reduce((acc, curr) => acc + Math.abs(curr.amount), 0),
+      count: transfers.length,
+    },
   };
 
   const dates = transactions
@@ -37,8 +43,19 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
   const firstTransactionDate = dates.length > 0 ? new Date(dates[0]) : null;
   const lastTransactionDate = dates.length > 0 ? new Date(dates[dates.length - 1]) : null;
 
-  const handleCountClick = (filterType: string) => {
-    navigate(`/transactions?type=${filterType}`);
+  const handleCountClick = (filterType: string, filterValue?: string) => {
+    let queryParams = new URLSearchParams();
+    
+    if (filterType === 'CARD_PAYMENT') {
+      queryParams.set('type', filterType);
+    } else if (filterType === 'product') {
+      queryParams.set('product', filterValue || '');
+    } else if (filterType === 'TRANSFER') {
+      queryParams.set('type', filterType);
+      queryParams.set('description', filterValue || '');
+    }
+    
+    navigate(`/transactions?${queryParams.toString()}`);
   };
 
   return (
@@ -101,8 +118,14 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold tracking-tight">
-                {formatEuroAmount(stats.savingsTotal)}
+                {formatEuroAmount(stats.savingsTotal.amount)}
               </div>
+              <button
+                onClick={() => handleCountClick('product', 'Savings')}
+                className="inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-semibold text-green-500 transition-colors hover:bg-green-500/20 cursor-pointer"
+              >
+                {formatTransactionCount(stats.savingsTotal.count)} transactions
+              </button>
             </div>
           </CardContent>
         </Card>
@@ -119,8 +142,14 @@ const TransactionStats = ({ transactions }: TransactionStatsProps) => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold tracking-tight">
-                {formatEuroAmount(stats.creditCardRepayments)}
+                {formatEuroAmount(stats.creditCardRepayments.amount)}
               </div>
+              <button
+                onClick={() => handleCountClick('TRANSFER', 'Credit card repayment')}
+                className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-500 transition-colors hover:bg-blue-500/20 cursor-pointer"
+              >
+                {formatTransactionCount(stats.creditCardRepayments.count)} transactions
+              </button>
             </div>
           </CardContent>
         </Card>
