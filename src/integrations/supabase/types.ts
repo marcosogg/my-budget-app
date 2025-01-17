@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bill_reminders: {
+        Row: {
+          amount: number | null
+          created_at: string
+          due_date: string
+          id: string
+          image_url: string | null
+          is_paid: boolean | null
+          name: string
+          notification_types: Database["public"]["Enums"]["notification_type"][]
+          reminder_days_before: number[]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          due_date: string
+          id?: string
+          image_url?: string | null
+          is_paid?: boolean | null
+          name: string
+          notification_types: Database["public"]["Enums"]["notification_type"][]
+          reminder_days_before: number[]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          image_url?: string | null
+          is_paid?: boolean | null
+          name?: string
+          notification_types?: Database["public"]["Enums"]["notification_type"][]
+          reminder_days_before?: number[]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -172,6 +214,53 @@ export type Database = {
           total_monthly_income?: number
         }
         Relationships: []
+      }
+      reminder_notifications: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          reminder_id: string
+          scheduled_for: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["reminder_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          reminder_id: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["reminder_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          reminder_id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["reminder_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_notifications_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "bill_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
@@ -341,6 +430,8 @@ export type Database = {
     }
     Enums: {
       category_type: "expense" | "uncategorized"
+      notification_type: "whatsapp" | "email" | "in_app"
+      reminder_status: "pending" | "sent" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
