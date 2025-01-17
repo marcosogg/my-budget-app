@@ -5,7 +5,6 @@ import { MappingDialog } from "@/components/mappings/MappingDialog";
 import { DeleteMappingDialog } from "@/components/mappings/DeleteMappingDialog";
 import { MappingTable } from "@/components/mappings/MappingTable";
 import { MappingHeader } from "@/components/mappings/MappingHeader";
-import { toast } from "sonner";
 
 interface Mapping {
   id: string;
@@ -22,6 +21,7 @@ const Mappings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [mappingToDelete, setMappingToDelete] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   const { data: mappings, isLoading, error } = useQuery({
     queryKey: ["description-mappings"],
@@ -67,10 +67,16 @@ const Mappings = () => {
     setIsAddEditOpen(true);
   };
 
-  const filteredMappings = mappings?.filter((mapping) =>
-    mapping.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    mapping.category_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMappings = mappings?.filter((mapping) => {
+    const matchesSearch = mapping.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mapping.category_name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (showActiveOnly) {
+      return matchesSearch && mapping.transaction_count > 0;
+    }
+    
+    return matchesSearch;
+  });
 
   return (
     <div className="container py-6 space-y-6">
@@ -78,6 +84,8 @@ const Mappings = () => {
         onAddNew={handleAddNew}
         searchTerm={searchTerm}
         onSearchChange={(value) => setSearchTerm(value)}
+        showActiveOnly={showActiveOnly}
+        onShowActiveChange={setShowActiveOnly}
       />
 
       <MappingTable
