@@ -14,7 +14,7 @@ interface TransactionStatsProps {
 
 const TransactionStats = ({ transactions, categories = [], isLoading = false }: TransactionStatsProps) => {
   const navigate = useNavigate();
-  const { stats, firstTransactionDate, lastTransactionDate } = useTransactionStats(transactions);
+  const { stats, firstTransactionDate, lastTransactionDate } = useTransactionStats(transactions, categories);
 
   const handleCountClick = (filterType: string, filterValue?: string) => {
     let queryParams = new URLSearchParams();
@@ -31,9 +31,6 @@ const TransactionStats = ({ transactions, categories = [], isLoading = false }: 
     console.log('Navigation params:', queryParams.toString());
     navigate(`/transactions?${queryParams.toString()}`);
   };
-
-  // Find expense categories for proper categorization
-  const expenseCategories = categories.filter(category => category.type === 'expense');
 
   return (
     <div className="space-y-8">

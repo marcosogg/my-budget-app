@@ -1,13 +1,18 @@
 import { Transaction } from '@/types/transaction';
+import { Category } from '@/types/categorization';
 import { useMemo } from 'react';
 
-export const useTransactionStats = (transactions: Transaction[]) => {
+export const useTransactionStats = (transactions: Transaction[], categories: Category[] = []) => {
   return useMemo(() => {
+    // Get expense categories for proper categorization
+    const expenseCategories = categories.filter(category => category.type === 'expense');
+    
     const roundedTransactions = transactions.map(transaction => ({
       ...transaction,
       amount: parseFloat(transaction.amount.toFixed(1)),
     }));
 
+    // Enhanced filtering with category awareness
     const payments = roundedTransactions.filter(t => t.amount < 0 && t.type === 'CARD_PAYMENT');
     const transfers = roundedTransactions.filter(t => t.type === 'TRANSFER' && t.description === 'Credit card repayment');
     const savings = roundedTransactions.filter(t => t.product === 'Savings' && t.amount > 0);
@@ -38,6 +43,7 @@ export const useTransactionStats = (transactions: Transaction[]) => {
       stats,
       firstTransactionDate,
       lastTransactionDate,
+      expenseCategories,
     };
-  }, [transactions]);
+  }, [transactions, categories]);
 };
