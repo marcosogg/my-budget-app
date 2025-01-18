@@ -38,14 +38,14 @@ export function NotificationList() {
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">
-                  {notification.title || 'Notification'}
+                  {notification.notification_title || 'Notification'}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {notification.content || 'No content'}
+                {notification.notification_content || 'No content'}
               </p>
             </button>
           ))}
