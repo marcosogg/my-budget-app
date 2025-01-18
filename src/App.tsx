@@ -11,6 +11,7 @@ import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
 import Categories from "./pages/analytics/Categories";
 import Mappings from "./pages/Mappings";
+import Reminders from "./pages/Reminders";
 import { supabase } from "./integrations/supabase/client";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
@@ -114,6 +115,14 @@ const App = () => {
                       element={
                         <ProtectedRoute>
                           <Categories />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/reminders"
+                      element={
+                        <ProtectedRoute>
+                          <Reminders />
                         </ProtectedRoute>
                       }
                     />

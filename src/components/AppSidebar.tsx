@@ -43,6 +43,11 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
+              <Link to="/reminders" className="flex items-center gap-2">Reminders</Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
               <Link to="/login" className="flex items-center gap-2">Login</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
