@@ -6,9 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ReminderForm } from "./forms/ReminderForm";
+
+type NotificationType = "whatsapp" | "email" | "in_app";
 
 interface ReminderDialogProps {
   open: boolean;
@@ -19,7 +21,7 @@ interface ReminderDialogProps {
     amount: number;
     due_date: string;
     reminder_days_before: number[];
-    notification_types: string[];
+    notification_types: NotificationType[];
     recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
     recurrence_end_date?: string;
   };
@@ -49,7 +51,7 @@ export function ReminderDialog({
     amount: number;
     due_date: Date;
     reminder_days_before: number[];
-    notification_types: string[];
+    notification_types: NotificationType[];
     recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
     recurrence_end_date?: Date;
   }) => {
@@ -66,7 +68,7 @@ export function ReminderDialog({
         amount: data.amount,
         due_date: data.due_date.toISOString(),
         reminder_days_before: data.reminder_days_before,
-        notification_types: data.notification_types,
+        notification_types: data.notification_types as NotificationType[],
         recurrence_frequency: data.recurrence_frequency,
         recurrence_end_date: data.recurrence_end_date?.toISOString(),
         user_id: user.id,
