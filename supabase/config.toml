@@ -26,5 +26,5 @@ enabled = true
 enabled = true
 
 [[functions]]
-name = "send-reminder-notification"
+[functions.send-reminder-notification]
 verify_jwt = true
