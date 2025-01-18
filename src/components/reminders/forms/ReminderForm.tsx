@@ -64,6 +64,10 @@ export function ReminderForm({
     },
   });
 
+  const handleCalendarClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -125,7 +129,7 @@ export function ReminderForm({
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0" align="start" onClick={handleCalendarClick}>
                   <Calendar
                     mode="single"
                     selected={field.value}
@@ -193,7 +197,7 @@ export function ReminderForm({
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0" align="start" onClick={handleCalendarClick}>
                     <Calendar
                       mode="single"
                       selected={field.value}
