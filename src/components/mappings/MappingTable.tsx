@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { formatEuroDate } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 interface Mapping {
   id: string;
@@ -78,7 +79,12 @@ export function MappingTable({
         {mappings?.map((mapping) => (
           <TableRow key={mapping.id}>
             <TableCell className="font-medium">{mapping.description}</TableCell>
-            <TableCell>{mapping.category_name}</TableCell>
+            <TableCell>
+              {mapping.category_name}
+              {mapping.transaction_count > 0 && (
+                <Badge variant="secondary" className="ml-2">Active</Badge>
+              )}
+            </TableCell>
             <TableCell className="text-right">
               {new Intl.NumberFormat('de-DE').format(mapping.transaction_count)}
             </TableCell>
