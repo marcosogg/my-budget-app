@@ -17,8 +17,14 @@ export type Database = {
           id: string
           image_url: string | null
           is_paid: boolean | null
+          is_recurring_instance: boolean | null
           name: string
           notification_types: Database["public"]["Enums"]["notification_type"][]
+          parent_reminder_id: string | null
+          recurrence_end_date: string | null
+          recurrence_frequency:
+            | Database["public"]["Enums"]["recurrence_frequency"]
+            | null
           reminder_days_before: number[]
           updated_at: string | null
           user_id: string
@@ -30,8 +36,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_paid?: boolean | null
+          is_recurring_instance?: boolean | null
           name: string
           notification_types: Database["public"]["Enums"]["notification_type"][]
+          parent_reminder_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_frequency?:
+            | Database["public"]["Enums"]["recurrence_frequency"]
+            | null
           reminder_days_before: number[]
           updated_at?: string | null
           user_id: string
@@ -43,13 +55,27 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_paid?: boolean | null
+          is_recurring_instance?: boolean | null
           name?: string
           notification_types?: Database["public"]["Enums"]["notification_type"][]
+          parent_reminder_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_frequency?:
+            | Database["public"]["Enums"]["recurrence_frequency"]
+            | null
           reminder_days_before?: number[]
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bill_reminders_parent_reminder_id_fkey"
+            columns: ["parent_reminder_id"]
+            isOneToOne: false
+            referencedRelation: "bill_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
@@ -431,6 +457,7 @@ export type Database = {
     Enums: {
       category_type: "expense" | "uncategorized"
       notification_type: "whatsapp" | "email" | "in_app"
+      recurrence_frequency: "none" | "daily" | "weekly" | "monthly" | "yearly"
       reminder_status: "pending" | "sent" | "failed"
     }
     CompositeTypes: {
