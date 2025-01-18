@@ -1,98 +1,21 @@
-import { Home, Upload, FileText, BarChart2, Map } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { SidebarNav } from "@/components/ui/sidebar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Link } from "react-router-dom";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-
-const items = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Transactions",
-    url: "/transactions",
-    icon: FileText,
-  },
-  {
-    title: "Upload",
-    url: "/upload",
-    icon: Upload,
-  },
-  {
-    title: "Mappings",
-    url: "/mappings",
-    icon: Map,
-  },
-];
-
-const analyticsItems = [
-  {
-    title: "Categories",
-    url: "/analytics/categories",
-    icon: BarChart2,
-  },
-];
 
 export function AppSidebar() {
-  const location = useLocation();
-
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Analytics</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {analyticsItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+    <SidebarNav>
+      <div className="flex items-center justify-end p-4">
+        <NotificationBell />
+      </div>
+      <nav className="flex flex-col space-y-2">
+        <Link to="/" className="p-2 hover:bg-gray-200 rounded">Dashboard</Link>
+        <Link to="/transactions" className="p-2 hover:bg-gray-200 rounded">Transactions</Link>
+        <Link to="/upload" className="p-2 hover:bg-gray-200 rounded">Upload</Link>
+        <Link to="/mappings" className="p-2 hover:bg-gray-200 rounded">Mappings</Link>
+        <Link to="/analytics/categories" className="p-2 hover:bg-gray-200 rounded">Categories</Link>
+        <Link to="/login" className="p-2 hover:bg-gray-200 rounded">Login</Link>
+      </nav>
+    </SidebarNav>
   );
 }

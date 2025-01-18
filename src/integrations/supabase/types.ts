@@ -246,7 +246,11 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          notification_content: string | null
+          notification_title: string | null
           notification_type: Database["public"]["Enums"]["notification_type"]
+          priority: string | null
+          read_at: string | null
           reminder_id: string
           scheduled_for: string
           sent_at: string | null
@@ -258,7 +262,11 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          notification_content?: string | null
+          notification_title?: string | null
           notification_type: Database["public"]["Enums"]["notification_type"]
+          priority?: string | null
+          read_at?: string | null
           reminder_id: string
           scheduled_for: string
           sent_at?: string | null
@@ -270,7 +278,11 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          notification_content?: string | null
+          notification_title?: string | null
           notification_type?: Database["public"]["Enums"]["notification_type"]
+          priority?: string | null
+          read_at?: string | null
           reminder_id?: string
           scheduled_for?: string
           sent_at?: string | null
@@ -458,7 +470,7 @@ export type Database = {
       category_type: "expense" | "uncategorized"
       notification_type: "whatsapp" | "email" | "in_app"
       recurrence_frequency: "none" | "daily" | "weekly" | "monthly" | "yearly"
-      reminder_status: "pending" | "sent" | "failed"
+      reminder_status: "pending" | "sent" | "failed" | "read"
     }
     CompositeTypes: {
       [_ in never]: never
