@@ -22,10 +22,10 @@ export const parseCSV = async (fileContent: string): Promise<Transaction[]> => {
               return null;
             }
 
-            // Safest and simplest way to adjust the rent transaction:
+            // Corrected rent adjustment logic:
             if (row['Description'] === "To Trading Places" && amount === -2200.00) {
               amount = -1000.00;
-              row['Description'] = `⚡${row['Description']} (adjusted)`; // Add flag
+              row['Description'] = `⚡${row['Description']} (adjusted)`;
             }
 
             return {
@@ -34,7 +34,7 @@ export const parseCSV = async (fileContent: string): Promise<Transaction[]> => {
               started_date: parseDate(row['Started Date']),
               completed_date: completedDate,
               description: row['Description'],
-              amount: amount,
+              amount: amount, // Use the potentially modified amount
               fee: parseFloat(row['Fee']) || 0,
               currency: row['Currency'],
               state: row['State'],
