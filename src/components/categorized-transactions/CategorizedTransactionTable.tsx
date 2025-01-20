@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCategories } from '@/hooks/useCategories';
-import { useCategorizedTransactions } from './hooks/useCategorizedTransactions';
+import { useCategorizedTransactionsData } from '@/hooks/useCategorizedTransactionsData';
 import { useTransactionFilters } from './hooks/useTransactionFilters';
 import { useTransactionSort } from './hooks/useTransactionSort';
 import { FilterBar } from './components/FilterBar';
@@ -17,7 +17,13 @@ const CategorizedTransactionTable = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const { data: categories = [] } = useCategories();
-  const { categorizedTransactions, isLoading, error, handleUpdateCategory } = useCategorizedTransactions();
+  const { 
+    categorizedTransactions, 
+    isLoading, 
+    error, 
+    updateCategory 
+  } = useCategorizedTransactionsData();
+  
   const { filters, filteredTransactions, handleFilterChange } = useTransactionFilters(categorizedTransactions);
   const { sortOption, setSortOption, sortedTransactions } = useTransactionSort(filteredTransactions);
 
@@ -28,6 +34,11 @@ const CategorizedTransactionTable = () => {
   if (error) {
     return <div>Error loading categorized transactions.</div>;
   }
+
+  const handleUpdateCategory = (transactionId: string, categoryId: string) => {
+    updateCategory({ transactionId, categoryId });
+    setEditingId(null);
+  };
 
   return (
     <div className="space-y-4">
