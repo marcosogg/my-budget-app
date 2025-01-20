@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Check } from "lucide-react";
-import { formatDate } from "@/lib/formatters";
+import { formatEuroDate } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BillReminder {
@@ -89,7 +89,7 @@ export function ReminderTable({
                 currency: 'EUR' 
               }).format(reminder.amount)}
             </TableCell>
-            <TableCell>{formatDate(reminder.due_date)}</TableCell>
+            <TableCell>{formatEuroDate(reminder.due_date)}</TableCell>
             <TableCell className="capitalize">{reminder.recurrence_frequency}</TableCell>
             <TableCell>
               <Button

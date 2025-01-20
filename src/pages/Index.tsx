@@ -13,6 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Use the enhanced categories hook
   const { data: categories = [], isLoading: categoriesLoading } = useCategories({
     onlyExpenses: true
   });

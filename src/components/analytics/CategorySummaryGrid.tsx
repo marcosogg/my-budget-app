@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, ChartBar } from "lucide-react";
-import { formatEuroAmount, formatTransactionCount } from "@/lib/formatters";
+import { formatEuroAmount, formatTransactionCount } from "@/utils/formatters";
 
 interface CategorySpending {
   category_name: string;

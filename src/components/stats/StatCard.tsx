@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
-import { formatEuroAmount, formatTransactionCount } from '@/lib/formatters';
+import { formatEuroAmount, formatTransactionCount } from '@/utils/formatters';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface StatCardProps {

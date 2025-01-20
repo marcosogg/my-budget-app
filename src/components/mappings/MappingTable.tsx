@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
-import { formatDate } from "@/lib/formatters";
+import { formatEuroDate } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
@@ -90,7 +90,7 @@ export function MappingTable({
             </TableCell>
             <TableCell>
               {mapping.last_used_date 
-                ? formatDate(mapping.last_used_date)
+                ? formatEuroDate(mapping.last_used_date)
                 : 'Never'}
             </TableCell>
             <TableCell>
