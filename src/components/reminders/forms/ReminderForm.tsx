@@ -23,13 +23,13 @@ interface ReminderFormData {
   due_day: number;
   reminder_days_before: number[];
   notification_types: string[];
-  recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_frequency: 'none' | 'monthly' | 'yearly';
 }
 
 interface ReminderFormProps {
   defaultValues: Partial<ReminderFormData>;
   isSubmitting: boolean;
-  onSubmit: (data: ReminderFormData) => void;
+  onSubmit: (data: any) => void; // Using any temporarily to match parent component
   onCancel: () => void;
 }
 
