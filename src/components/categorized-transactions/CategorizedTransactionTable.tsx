@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -6,43 +5,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCategories } from '@/hooks/useCategories';
-import { useCategorizedTransactionsData } from '@/hooks/useCategorizedTransactionsData';
-import { useTransactionFilters } from './hooks/useTransactionFilters';
-import { useTransactionSort } from './hooks/useTransactionSort';
+import { Category } from '@/types/categorization';
 import { FilterBar } from './components/FilterBar';
 import { TransactionRow } from './components/TransactionRow';
-import { useUpdateCategory } from '@/hooks/useUpdateCategory';
+import { CategorizedTransactionWithDetails } from '@/services/categoryService';
+import { SortOption } from './hooks/useTransactionSort';
 
-const CategorizedTransactionTable = () => {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  
-  const { data: categories = [] } = useCategories();
-  const { categorizedTransactions, isLoading, error } = useCategorizedTransactionsData();
-  const { updateCategory } = useUpdateCategory();
-  
-  const { filters, filteredTransactions, handleFilterChange } = useTransactionFilters(categorizedTransactions);
-  const { sortOption, setSortOption, sortedTransactions } = useTransactionSort(filteredTransactions);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading categorized transactions.</div>;
-  }
-
-  const handleUpdateCategory = (transactionId: string, categoryId: string) => {
-    updateCategory({ transactionId, categoryId });
-    setEditingId(null);
+interface CategorizedTransactionTableProps {
+  transactions: CategorizedTransactionWithDetails[];
+  categories: Category[];
+  editingId: string | null;
+  onEdit: (id: string | null) => void;
+  onUpdateCategory: (transactionId: string, categoryId: string) => void;
+  filters: {
+    category: string;
+    description: string;
+    date: Date | undefined;
   };
+  onFilterChange: (type: string, value: string | Date | undefined) => void;
+  onSortChange: (value: SortOption) => void;
+}
 
+const CategorizedTransactionTable = ({
+  transactions,
+  categories,
+  editingId,
+  onEdit,
+  onUpdateCategory,
+  filters,
+  onFilterChange,
+  onSortChange,
+}: CategorizedTransactionTableProps) => {
   return (
     <div className="space-y-4">
       <FilterBar
-        transactions={categorizedTransactions}
-        onFilterChange={handleFilterChange}
-        onSortChange={setSortOption}
+        transactions={transactions}
+        onFilterChange={onFilterChange}
+        onSortChange={onSortChange}
         filters={filters}
       />
       
@@ -60,14 +59,14 @@ const CategorizedTransactionTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTransactions.map((transaction) => (
+            {transactions.map((transaction) => (
               <TransactionRow
                 key={transaction.id}
                 transaction={transaction}
                 categories={categories}
                 editingId={editingId}
-                onEdit={setEditingId}
-                onUpdateCategory={handleUpdateCategory}
+                onEdit={onEdit}
+                onUpdateCategory={onUpdateCategory}
               />
             ))}
           </TableBody>
