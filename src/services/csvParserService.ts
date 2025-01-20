@@ -1,66 +1,54 @@
-import { parse } from 'papaparse';
+import Papa from 'papaparse';
 import { Transaction } from '@/types/transaction';
-import { parseCustomDate } from '@/utils/dateParser';
+import { parseDate } from '@/utils/dateParser';
 
-const headerMap: { [key: string]: string } = {
-  'Type': 'type',
-  'Product': 'product',
-  'Started Date': 'started_date',
-  'Completed Date': 'completed_date',
-  'Description': 'description',
-  'Amount': 'amount',
-  'Fee': 'fee',
-  'Currency': 'currency',
-  'State': 'state',
-  'Balance': 'balance'
-};
-
-const adjustRentTransaction = (transaction: Transaction): Transaction => {
-  if (
-    transaction.description?.toLowerCase().includes('rent') &&
-    transaction.amount === 2200
-  ) {
-    return {
-      ...transaction,
-      amount: 1000,
-      description: `${transaction.description} ⚡`, // Adding indicator for adjusted transactions
-    };
-  }
-  return transaction;
-};
-
-export const parseCSV = (text: string): Promise<Transaction[]> => {
+export const parseCSV = async (fileContent: string): Promise<Transaction[]> => {
   return new Promise((resolve, reject) => {
-    parse(text, {
+    Papa.parse(fileContent, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => {
-        console.log('Transforming header:', header, 'to:', headerMap[header] || header);
-        return headerMap[header] || header;
-      },
-      transform: (value, field) => {
-        if (field === 'amount' || field === 'fee' || field === 'balance') {
-          return parseFloat(value);
-        }
-        if (field === 'completed_date' || field === 'started_date') {
-          const parsedDate = parseCustomDate(value);
-          if (!parsedDate) {
-            console.error('Failed to parse date:', value);
-            return null;
-          }
-          return parsedDate;
-        }
-        return value;
-      },
       complete: (results) => {
-        const transactions = (results.data as Transaction[])
-          .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
-          .map(adjustRentTransaction); // Apply rent adjustment to each transaction
+        const transactions = results.data
+          .map((row: any) => {
+            const completedDate = parseDate(row['Completed Date']);
+            if (!completedDate) {
+              console.warn(`Skipping row with invalid date: ${row['Completed Date']}`);
+              return null;
+            }
+
+            let amount = parseFloat(row['Amount']);
+            if (isNaN(amount)) {
+              console.warn(`Skipping row with invalid amount: ${row['Amount']}`);
+              return null;
+            }
+
+            // Safest and simplest way to adjust the rent transaction:
+            if (row['Description'] === "To Trading Places" && amount === -2200.00) {
+              amount = -1000.00;
+              row['Description'] = `⚡${row['Description']} (adjusted)`; // Add flag
+            }
+
+            return {
+              type: row['Type'],
+              product: row['Product'],
+              started_date: parseDate(row['Started Date']),
+              completed_date: completedDate,
+              description: row['Description'],
+              amount: amount,
+              fee: parseFloat(row['Fee']) || 0,
+              currency: row['Currency'],
+              state: row['State'],
+              balance: parseFloat(row['Balance']) || 0,
+            } as Transaction;
+          })
+          .filter((transaction): transaction is Transaction => transaction !== null);
+
         resolve(transactions);
       },
-      error: (error) => {
+      error: (error: Error) => {
+        console.error('CSV parsing error:', error);
         reject(error);
-      }
+      },
     });
   });
 };
