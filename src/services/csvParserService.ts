@@ -16,17 +16,17 @@ const headerMap: { [key: string]: string } = {
 };
 
 // Rent transaction identification configuration
-const RENT_KEYWORDS = ['trading places', 'rent'];
-const RENT_AMOUNT = 2200; // Positive value for comparison
-const ADJUSTED_RENT_AMOUNT = 1000;
+const RENT_AMOUNT = -2200; // Negative value for expenses
+const ADJUSTED_RENT_AMOUNT = -1000; // Adjusted negative amount
 
 const isRentTransaction = (transaction: Transaction): boolean => {
   const description = transaction.description?.toLowerCase().trim() || '';
 
-  const hasTradingPlaces = description.includes('trading places');
+  // Ensure description matches exactly "to trading places"
+  const hasTradingPlaces = description === 'to trading places';
 
-  // Use a tolerance to handle floating point precision
-  const isCorrectAmount = Math.abs(transaction.amount + RENT_AMOUNT) < 0.01;
+  // Correct amount comparison
+  const isCorrectAmount = Math.abs(transaction.amount - RENT_AMOUNT) < 0.01;
 
   console.log('Rent transaction check:', {
     description,
@@ -40,12 +40,14 @@ const isRentTransaction = (transaction: Transaction): boolean => {
 
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
   if (isRentTransaction(transaction)) {
-    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', -ADJUSTED_RENT_AMOUNT);
-    return {
+    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', ADJUSTED_RENT_AMOUNT);
+    const adjustedTransaction = {
       ...transaction,
-      amount: -ADJUSTED_RENT_AMOUNT, // Keep negative sign for expenses
-      description: `${transaction.description} ⚡ (adjusted)`, // Adding indicators
+      amount: ADJUSTED_RENT_AMOUNT,
+      description: `⚡${transaction.description} (adjusted)`,
     };
+    console.log('Adjusted transaction:', adjustedTransaction);
+    return adjustedTransaction;
   }
   return transaction;
 };
@@ -68,6 +70,7 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
           return parsedNumber;
         }
         if (field === 'completed_date' || field === 'started_date') {
+          console.log(`Parsing field ${field}: value = "${value}"`);
           const parsedDate = parseCustomDate(value);
           if (!parsedDate) {
             console.error('Failed to parse date:', value);
