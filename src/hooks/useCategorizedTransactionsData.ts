@@ -23,15 +23,7 @@ export const useCategorizedTransactionsData = () => {
       transactionId: string; 
       categoryId: string; 
     }) => {
-      const transaction = categorizedTransactions.find(t => t.id === transactionId);
-      if (!transaction) throw new Error('Transaction not found');
-
-      await categoryService.updateTransactionCategory(
-        transactionId,
-        categoryId,
-        transaction.user_id,
-        transaction.transactions.description
-      );
+      await categoryService.updateTransactionCategory(transactionId, categoryId);
     },
     onSuccess: () => {
       toast({
