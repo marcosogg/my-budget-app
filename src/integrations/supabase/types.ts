@@ -469,7 +469,7 @@ export type Database = {
     Enums: {
       category_type: "expense" | "uncategorized"
       notification_type: "whatsapp" | "email" | "in_app"
-      recurrence_frequency: "none" | "daily" | "weekly" | "monthly" | "yearly"
+      recurrence_frequency: "none" | "monthly"
       reminder_status: "pending" | "sent" | "failed" | "read"
     }
     CompositeTypes: {
