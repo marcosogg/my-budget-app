@@ -19,15 +19,26 @@ export function useReminders() {
   });
 
   const deleteReminder = useMutation({
-    mutationFn: async (reminderId: string) => {
-      if (!reminderId) {
+    mutationFn: async (reminder: { id: string; parent_reminder_id: string | null }) => {
+      if (!reminder.id) {
         throw new Error("Reminder ID is required");
       }
 
+      // If this is a parent reminder (no parent_reminder_id), delete all child reminders first
+      if (!reminder.parent_reminder_id) {
+        const { error: childDeletionError } = await supabase
+          .from("bill_reminders")
+          .delete()
+          .eq("parent_reminder_id", reminder.id);
+
+        if (childDeletionError) throw childDeletionError;
+      }
+
+      // Now delete the reminder itself
       const { error } = await supabase
         .from("bill_reminders")
         .delete()
-        .eq("id", reminderId);
+        .eq("id", reminder.id);
 
       if (error) throw error;
     },
