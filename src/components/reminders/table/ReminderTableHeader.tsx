@@ -7,6 +7,7 @@ export function ReminderTableHeader() {
         <TableHead>Name</TableHead>
         <TableHead>Amount</TableHead>
         <TableHead>Due Date</TableHead>
+        <TableHead>Next Due Date</TableHead>
         <TableHead>Recurrence</TableHead>
         <TableHead>Status</TableHead>
         <TableHead className="w-[100px]">Actions</TableHead>
