@@ -12,23 +12,33 @@ interface TransactionStatsProps {
   isLoading?: boolean;
 }
 
-const TransactionStats = ({ transactions, categories = [], isLoading = false }: TransactionStatsProps) => {
+const TransactionStats = ({ 
+  transactions, 
+  categories = [], 
+  isLoading = false 
+}: TransactionStatsProps) => {
   const navigate = useNavigate();
-  const { stats, firstTransactionDate, lastTransactionDate } = useTransactionStats(transactions, categories);
+  const { stats, firstTransactionDate, lastTransactionDate } = useTransactionStats(
+    transactions, 
+    categories
+  );
 
   const handleCountClick = (filterType: string, filterValue?: string) => {
-    let queryParams = new URLSearchParams();
+    const queryParams = new URLSearchParams();
     
-    if (filterType === 'CARD_PAYMENT') {
-      queryParams.set('type', filterType);
-    } else if (filterType === 'product') {
-      queryParams.set('product', filterValue || '');
-    } else if (filterType === 'TRANSFER') {
-      queryParams.set('type', filterType);
-      queryParams.set('description', filterValue || '');
+    switch (filterType) {
+      case 'CARD_PAYMENT':
+        queryParams.set('type', filterType);
+        break;
+      case 'product':
+        queryParams.set('product', filterValue || '');
+        break;
+      case 'TRANSFER':
+        queryParams.set('type', filterType);
+        queryParams.set('description', filterValue || '');
+        break;
     }
     
-    console.log('Navigation params:', queryParams.toString());
     navigate(`/transactions?${queryParams.toString()}`);
   };
 
