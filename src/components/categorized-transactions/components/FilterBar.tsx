@@ -14,6 +14,7 @@ interface FilterBarProps {
     transactions: Transaction, 
     categories: Category 
   })[];
+  categories: Category[];
   onFilterChange: (type: string, value: string | Date | undefined) => void;
   onSortChange: (value: SortOption) => void;
   filters: {
@@ -23,7 +24,7 @@ interface FilterBarProps {
   };
 }
 
-export const FilterBar = ({ transactions, onFilterChange, onSortChange, filters }: FilterBarProps) => {
+export const FilterBar = ({ categories, onFilterChange, onSortChange, filters }: FilterBarProps) => {
   return (
     <div className="flex flex-wrap gap-4">
       <Select onValueChange={(value: SortOption) => onSortChange(value)}>
@@ -38,14 +39,17 @@ export const FilterBar = ({ transactions, onFilterChange, onSortChange, filters 
         </SelectContent>
       </Select>
 
-      <Select onValueChange={(value) => onFilterChange('category', value)}>
+      <Select 
+        value={filters.category}
+        onValueChange={(value) => onFilterChange('category', value)}
+      >
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Filter by Category" />
         </SelectTrigger>
         <SelectContent>
-          {transactions.map((transaction) => (
-            <SelectItem key={transaction.categories.id} value={transaction.categories.name}>
-              {transaction.categories.name}
+          {categories.map((category) => (
+            <SelectItem key={category.id} value={category.name}>
+              {category.name}
             </SelectItem>
           ))}
         </SelectContent>
