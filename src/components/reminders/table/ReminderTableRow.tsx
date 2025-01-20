@@ -28,7 +28,8 @@ export function ReminderTableRow({
 }: ReminderTableRowProps) {
   const getNextDueDate = (dueDate: string, frequency: 'none' | 'monthly') => {
     if (frequency === 'none') return '-';
-    return formatEuroDate(addMonths(new Date(dueDate), 1));
+    const nextDate = addMonths(new Date(dueDate), 1);
+    return formatEuroDate(nextDate.toISOString());
   };
 
   return (
