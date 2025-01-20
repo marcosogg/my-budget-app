@@ -16,20 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 
 interface ReminderFormData {
   name: string;
   amount: number;
-  due_date: Date;
+  due_day: number;
   reminder_days_before: number[];
   notification_types: string[];
   recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-  recurrence_end_date?: Date;
 }
 
 interface ReminderFormProps {
@@ -41,8 +35,6 @@ interface ReminderFormProps {
 
 const recurrenceOptions = [
   { value: 'none', label: 'No recurrence' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'yearly', label: 'Yearly' },
 ];
@@ -57,6 +49,7 @@ export function ReminderForm({
     defaultValues: {
       name: '',
       amount: 0,
+      due_day: 1,
       reminder_days_before: [7],
       notification_types: ['email'],
       recurrence_frequency: 'none',
@@ -64,13 +57,25 @@ export function ReminderForm({
     },
   });
 
-  const handleCalendarClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSubmit = (data: ReminderFormData) => {
+    // Convert the due_day to a full date for the API
+    const today = new Date();
+    const dueDate = new Date(today.getFullYear(), today.getMonth(), data.due_day);
+    
+    // If the day has already passed this month, set it to next month
+    if (dueDate < today) {
+      dueDate.setMonth(dueDate.getMonth() + 1);
+    }
+
+    onSubmit({
+      ...data,
+      due_date: dueDate,
+    });
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -106,41 +111,25 @@ export function ReminderForm({
 
         <FormField
           control={form.control}
-          name="due_date"
+          name="due_day"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" onClick={handleCalendarClick}>
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date()
+            <FormItem>
+              <FormLabel>Due Day of Month</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min={1}
+                  max={31}
+                  {...field}
+                  onChange={e => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 1 && value <= 31) {
+                      field.onChange(value);
                     }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                  }}
+                  placeholder="Day of month (1-31)" 
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -170,50 +159,6 @@ export function ReminderForm({
             </FormItem>
           )}
         />
-
-        {form.watch('recurrence_frequency') !== 'none' && (
-          <FormField
-            control={form.control}
-            name="recurrence_end_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Recurrence End Date (Optional)</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>No end date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start" onClick={handleCalendarClick}>
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date()
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <div className="flex justify-end gap-2">
           <Button

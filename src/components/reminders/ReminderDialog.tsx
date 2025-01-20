@@ -22,8 +22,7 @@ interface ReminderDialogProps {
     due_date: string;
     reminder_days_before: number[];
     notification_types: NotificationType[];
-    recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-    recurrence_end_date?: string;
+    recurrence_frequency: 'none' | 'monthly' | 'yearly';
   };
 }
 
@@ -39,22 +38,13 @@ export function ReminderDialog({
   const defaultValues = reminder ? {
     name: reminder.name,
     amount: reminder.amount,
-    due_date: reminder.due_date ? new Date(reminder.due_date) : new Date(),
+    due_day: new Date(reminder.due_date).getDate(),
     reminder_days_before: reminder.reminder_days_before,
     notification_types: reminder.notification_types,
     recurrence_frequency: reminder.recurrence_frequency,
-    recurrence_end_date: reminder.recurrence_end_date ? new Date(reminder.recurrence_end_date) : undefined,
   } : {};
 
-  const handleSubmit = async (data: {
-    name: string;
-    amount: number;
-    due_date: Date;
-    reminder_days_before: number[];
-    notification_types: NotificationType[];
-    recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-    recurrence_end_date?: Date;
-  }) => {
+  const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -67,10 +57,9 @@ export function ReminderDialog({
         name: data.name,
         amount: data.amount,
         due_date: data.due_date.toISOString(),
-        reminder_days_before: data.reminder_days_before,
-        notification_types: data.notification_types as NotificationType[],
+        reminder_days_before: [7], // Default to 7 days
+        notification_types: ['email'] as NotificationType[], // Default to email
         recurrence_frequency: data.recurrence_frequency,
-        recurrence_end_date: data.recurrence_end_date?.toISOString(),
         user_id: user.id,
       };
 
