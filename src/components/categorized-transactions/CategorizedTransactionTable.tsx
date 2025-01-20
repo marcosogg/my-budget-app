@@ -47,7 +47,6 @@ const CategorizedTransactionTable = ({
   return (
     <div className="space-y-4">
       <FilterBar
-        transactions={transactions}
         categories={categories}
         onFilterChange={onFilterChange}
         onSortChange={onSortChange}
