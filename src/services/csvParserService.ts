@@ -1,7 +1,10 @@
 import { parse } from 'papaparse';
 import { Transaction } from '@/types/transaction';
 import { parseCustomDate } from '@/utils/dateParser';
+import { supabase } from '@/integrations/supabase/client';
+import { saveTransactions } from './transactionService';
 
+// Mapping of CSV headers to internal field names
 const headerMap: { [key: string]: string } = {
   'Type': 'type',
   'Product': 'product',
@@ -15,16 +18,18 @@ const headerMap: { [key: string]: string } = {
   'Balance': 'balance'
 };
 
-// Rent transaction identification configuration
+// Configuration for rent transaction identification
 const RENT_DESCRIPTION = 'To Trading Places';
 const RENT_AMOUNT = -2200;
 const ADJUSTED_RENT_AMOUNT = -1000;
 
+// Function to check if a transaction is a rent transaction
 const isRentTransaction = (transaction: Transaction): boolean => {
   const description = transaction.description?.toLowerCase().trim() || '';
   return description === RENT_DESCRIPTION.toLowerCase() && transaction.amount === RENT_AMOUNT;
 };
 
+// Function to adjust the rent transaction
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
   if (isRentTransaction(transaction)) {
     console.log('Adjusting rent transaction:', transaction);
@@ -37,41 +42,69 @@ const adjustRentTransaction = (transaction: Transaction): Transaction => {
   return transaction;
 };
 
+// Function to update the category mapping in the database
+async function updateCategoryMapping(userId: string, transaction: Transaction) {
+  if (!transaction.description || !transaction.completed_date) {
+    console.error("Transaction description or completed_date is missing");
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from("description_category_mappings")
+      .upsert(
+        {
+          user_id: userId,
+          description: transaction.description,
+          category_id: "4c242882-1c6e-4675-aa60-e5e80abdffba", //  "your_rent_category_id"
+          last_used_date: transaction.completed_date.toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "description,user_id" }
+      );
+
+    if (error) {
+      console.error("Error updating description_category_mappings:", error);
+    } else {
+      console.log("Updated description_category_mappings for:", transaction.description);
+    }
+  } catch (err) {
+    console.error("Unexpected error updating description_category_mappings:", err);
+  }
+}
+
+// Function to parse the CSV file content
 export const parseCSV = (text: string): Promise<Transaction[]> => {
-  return new Promise((resolve, reject) => {
-    parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => {
-        const transformedHeader = headerMap[header] || header;
-        console.log('Transforming header:', header, 'to:', transformedHeader);
-        return transformedHeader;
-      },
-      transform: (value, field) => {
-        console.log(`Raw value for field ${field}:`, value);
-        if (['amount', 'fee', 'balance'].includes(field)) {
-          const numericValue = parseFloat(value.replace(/,/g, ''));
-          console.log(`Parsed numeric value for field ${field}:`, numericValue);
-          return isNaN(numericValue) ? null : numericValue;
-        }
-        if (['completed_date', 'started_date'].includes(field)) {
-          const parsedDate = parseCustomDate(value);
-          console.log(`Parsed date for field ${field}:`, parsedDate);
-          if (!parsedDate) {
-            console.error('Failed to parse date:', value);
-            return null;
+    return new Promise((resolve, reject) => {
+      parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) => headerMap[header] || header,
+        transform: (value, field) => {
+          if (['amount', 'fee', 'balance'].includes(field)) {
+            const numericValue = parseFloat(value.replace(/,/g, ''));
+            return isNaN(numericValue) ? null : numericValue;
           }
-          return parsedDate;
-        }
-        return value;
-      },
-      complete: (results) => {
-        const transactions = (results.data as any[])
-          .filter(row => row.state === 'COMPLETED' && row.completed_date && row.started_date)
-          .map((row: { [key: string]: any }, index): Transaction => {
-            const transaction: Transaction = {
-              id: generateUniqueId(), // Generate a unique ID for each transaction
-              user_id: 'e8643c1c-e7a1-4c6b-b010-8476b179b7ed', // Replace with actual user ID
+          if (['completed_date', 'started_date'].includes(field)) {
+            const parsedDate = parseCustomDate(value);
+            return parsedDate || null;
+          }
+          return value;
+        },
+        complete: async (results) => {
+          const { data: { session } } = await supabase.auth.getSession();
+          const user = session?.user;
+          if (!user) {
+            console.error('No authenticated user found during CSV parsing');
+            reject('User not authenticated');
+            return;
+          }
+  
+          const transactions = (results.data as any[])
+            .filter(row => row.state === 'COMPLETED' && row.completed_date && row.started_date)
+            .map((row: { [key: string]: any }): Transaction => ({
+              id: generateUniqueId(),
+              user_id: user.id,
               type: row.type,
               product: row.product,
               started_date: row.started_date,
@@ -82,23 +115,34 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
               currency: row.currency,
               state: row.state,
               balance: row.balance,
-            };
-
-            const adjustedTransaction = adjustRentTransaction(transaction);
-            console.log('Transaction after adjustment:', adjustedTransaction);
-            return adjustedTransaction;
-          });
-
-        console.log('Filtered completed transactions count:', transactions.length);
-        resolve(transactions);
-      },
-      error: (error) => {
-        console.error('CSV parsing error:', error);
-        reject(error);
-      },
+            }));
+  
+          try {
+            // Save transactions first
+            const savedTransactions = await saveTransactions(transactions, user.id);
+            console.log('Transactions saved successfully:', savedTransactions);
+  
+            // Then update mappings based on saved transactions
+            for (const transaction of savedTransactions) {
+              const adjustedTransaction = adjustRentTransaction(transaction);
+              if (adjustedTransaction !== transaction) {
+                await updateCategoryMapping(user.id, adjustedTransaction);
+              }
+            }
+  
+            resolve(savedTransactions);
+          } catch (error) {
+            console.error('Error saving transactions or updating mappings:', error);
+            reject(error);
+          }
+        },
+        error: (error) => {
+          console.error('CSV parsing error:', error);
+          reject(error);
+        },
+      });
     });
-  });
-};
+  };
 
 // Function to generate a unique ID (consider using a library like `uuid` in a real app)
 function generateUniqueId() {
