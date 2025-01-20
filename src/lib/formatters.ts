@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { ArrowDown, ArrowUp, LucideIcon } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 // Date formatting
 export const formatDate = (dateStr: string | null): string => {
