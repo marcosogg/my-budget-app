@@ -16,38 +16,23 @@ const headerMap: { [key: string]: string } = {
 };
 
 // Rent transaction identification configuration
-const RENT_AMOUNT = -2200; // Negative value for expenses
-const ADJUSTED_RENT_AMOUNT = -1000; // Adjusted negative amount
+const RENT_DESCRIPTION = 'To Trading Places';
+const RENT_AMOUNT = -2200;
+const ADJUSTED_RENT_AMOUNT = -1000;
 
 const isRentTransaction = (transaction: Transaction): boolean => {
   const description = transaction.description?.toLowerCase().trim() || '';
-
-  // Ensure description matches exactly "to trading places"
-  const hasTradingPlaces = description === 'to trading places';
-
-  // Correct amount comparison
-  const isCorrectAmount = Math.abs(transaction.amount - RENT_AMOUNT) < 0.01;
-
-  console.log('Rent transaction check:', {
-    description,
-    hasTradingPlaces,
-    amount: transaction.amount,
-    isCorrectAmount,
-  });
-
-  return hasTradingPlaces && isCorrectAmount;
+  return description === RENT_DESCRIPTION.toLowerCase() && transaction.amount === RENT_AMOUNT;
 };
 
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
   if (isRentTransaction(transaction)) {
-    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', ADJUSTED_RENT_AMOUNT);
-    const adjustedTransaction = {
+    console.log('Adjusting rent transaction:', transaction);
+    return {
       ...transaction,
       amount: ADJUSTED_RENT_AMOUNT,
       description: `⚡${transaction.description} (adjusted)`,
     };
-    console.log('Adjusted transaction:', adjustedTransaction);
-    return adjustedTransaction;
   }
   return transaction;
 };
@@ -57,20 +42,12 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
     parse(text, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => {
-        console.log('Transforming header:', header, 'to:', headerMap[header] || header);
-        return headerMap[header] || header;
-      },
+      transformHeader: (header) => headerMap[header] || header,
       transform: (value, field) => {
-        if (field === 'amount' || field === 'fee' || field === 'balance') {
-          console.log(`Parsing field ${field}: value = "${value}"`);
-          const numericValue = value.replace(/,/g, '');
-          const parsedNumber = parseFloat(numericValue);
-          console.log(`Parsed number: ${parsedNumber}`);
-          return parsedNumber;
+        if (['amount', 'fee', 'balance'].includes(field)) {
+          return parseFloat(value.replace(/,/g, ''));
         }
-        if (field === 'completed_date' || field === 'started_date') {
-          console.log(`Parsing field ${field}: value = "${value}"`);
+        if (['completed_date', 'started_date'].includes(field)) {
           const parsedDate = parseCustomDate(value);
           if (!parsedDate) {
             console.error('Failed to parse date:', value);
@@ -84,10 +61,11 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
         const transactions = (results.data as Transaction[])
           .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
           .map(adjustRentTransaction);
-        console.log('Filtered completed transactions count:', transactions.length);
+        console.log('Parsed transactions:', transactions);
         resolve(transactions);
       },
       error: (error) => {
+        console.error('CSV parsing error:', error);
         reject(error);
       }
     });
