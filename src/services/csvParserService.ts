@@ -16,18 +16,26 @@ const headerMap: { [key: string]: string } = {
 };
 
 const isRentTransaction = (transaction: Transaction): boolean => {
-  return (
-    transaction.description?.toLowerCase().includes('trading places') &&
-    transaction.amount === 2200 &&
-    transaction.type.toLowerCase() === 'transfer'
-  );
+  console.log('Checking rent transaction:', {
+    description: transaction.description,
+    amount: transaction.amount,
+    type: transaction.type
+  });
+
+  const isMatch = transaction.description?.toLowerCase().includes('trading places') &&
+    Math.abs(transaction.amount) === 2200 &&
+    transaction.type.toLowerCase() === 'transfer';
+  
+  console.log('Is rent transaction match?', isMatch);
+  return isMatch;
 };
 
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
   if (isRentTransaction(transaction)) {
+    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', -1000);
     return {
       ...transaction,
-      amount: 1000,
+      amount: -1000, // Keep the negative sign for expenses
       description: `${transaction.description} ⚡`, // Adding indicator for adjusted transactions
     };
   }
@@ -61,6 +69,7 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
         const transactions = (results.data as Transaction[])
           .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
           .map(adjustRentTransaction); // Apply rent adjustment to each transaction
+        console.log('Filtered completed transactions count:', transactions.length);
         resolve(transactions);
       },
       error: (error) => {
