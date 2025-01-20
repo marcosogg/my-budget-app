@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Check } from "lucide-react";
-import { formatEuroDate } from "@/utils/formatters";
+import { formatEuroDate } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BillReminder {

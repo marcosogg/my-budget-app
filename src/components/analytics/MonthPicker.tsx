@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatEuroDate } from "@/utils/formatters";
+import { formatEuroDate } from "@/lib/formatters";
 
 interface MonthPickerProps {
   value: Date;
