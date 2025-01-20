@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ReminderForm } from "./forms/ReminderForm";
+import { ReminderForm, ReminderFormData } from "./forms/ReminderForm";
 import { useCreateReminder } from "./hooks/useCreateReminder";
 import { useUpdateReminder } from "./hooks/useUpdateReminder";
 
@@ -27,7 +27,7 @@ export function ReminderDialog({ open, onOpenChange, reminder }: ReminderDialogP
     onSuccess: () => onOpenChange(false),
   });
 
-  const defaultValues = reminder ? {
+  const defaultValues: ReminderFormData = reminder ? {
     name: reminder.name,
     amount: reminder.amount,
     due_day: new Date(reminder.due_date).getDate(),
@@ -39,7 +39,7 @@ export function ReminderDialog({ open, onOpenChange, reminder }: ReminderDialogP
     amount: 0,
     due_day: new Date().getDate(),
     reminder_days_before: [7],
-    notification_types: ['email'],
+    notification_types: ['email'] as ("whatsapp" | "email" | "in_app")[],
     recurrence_frequency: 'none' as const,
   };
 

@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ReminderForm } from "../forms/ReminderForm";
+import { ReminderForm, ReminderFormData } from "../forms/ReminderForm";
 import { useUpdateReminder } from "../hooks/useUpdateReminder";
 
 interface EditReminderDialogProps {
@@ -12,7 +12,7 @@ interface EditReminderDialogProps {
     due_date: string;
     reminder_days_before: number[];
     notification_types: ("whatsapp" | "email" | "in_app")[];
-    recurrence_frequency: 'none' | 'monthly' | 'yearly';
+    recurrence_frequency: 'none' | 'monthly';
   };
 }
 
@@ -26,7 +26,7 @@ export function EditReminderDialog({
     onSuccess: () => onOpenChange(false),
   });
 
-  const defaultValues = {
+  const defaultValues: ReminderFormData = {
     name: reminder.name,
     amount: reminder.amount,
     due_day: new Date(reminder.due_date).getDate(),

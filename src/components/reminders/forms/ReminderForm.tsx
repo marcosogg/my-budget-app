@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
-interface ReminderFormData {
+export interface ReminderFormData {
   name: string;
   amount: number;
   due_day: number;
@@ -23,7 +23,7 @@ interface ReminderFormData {
 interface ReminderFormProps {
   defaultValues: ReminderFormData;
   isSubmitting: boolean;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: ReminderFormData) => void;
   onCancel: () => void;
 }
 
