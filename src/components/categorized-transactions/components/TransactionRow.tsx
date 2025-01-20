@@ -3,8 +3,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TableCell, TableRow } from '@/components/ui/table';
 import { CategorizedTransaction, Category } from '@/types/categorization';
 import { Transaction } from '@/types/transaction';
-import { Edit } from 'lucide-react';
-import { formatDate, formatAmount, getTransactionColor, getTransactionIcon } from '@/lib/formatters';
+import { Edit, ArrowUp, ArrowDown } from 'lucide-react';
+import { formatDate, formatAmount, getTransactionColor } from '../utils/formatters';
 
 interface TransactionRowProps {
   transaction: CategorizedTransaction & { 
@@ -24,6 +24,13 @@ export const TransactionRow = ({
   onEdit,
   onUpdateCategory,
 }: TransactionRowProps) => {
+  const getTransactionIcon = (amount: number) => {
+    if (amount > 0) {
+      return <ArrowUp className="w-4 h-4 text-transaction-income" />;
+    }
+    return <ArrowDown className="w-4 h-4 text-transaction-expense" />;
+  };
+
   return (
     <TableRow>
       <TableCell className="font-medium">
