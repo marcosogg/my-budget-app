@@ -14,6 +14,42 @@ interface FileUploadProps {
 const FileUpload = ({ onFileUpload }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
+  const handleError = (error: Error, message: string) => {
+    console.error(message, error);
+    toast.error(message);
+    setIsUploading(false);
+  };
+
+  const processFile = async (file: File) => {
+    const reader = new FileReader();
+    
+    return new Promise<Transaction[]>((resolve, reject) => {
+      reader.onload = async (e) => {
+        try {
+          const text = e.target?.result as string;
+          if (!text) {
+            throw new Error('Failed to read file content');
+          }
+          
+          const transactions = await parseCSV(text);
+          console.log('Filtered completed transactions count:', transactions.length);
+          
+          if (transactions.length === 0) {
+            reject(new Error('No valid completed transactions found'));
+            return;
+          }
+
+          resolve(transactions);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
+  };
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) {
       toast.error('Please select a CSV file');
@@ -32,76 +68,46 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
     toast.info('Processing your CSV file...', { duration: 2000 });
 
     try {
+      // Clear existing data
       const cleared = await clearExistingData();
       if (!cleared) {
-        setIsUploading(false);
+        handleError(new Error('Failed to clear existing data'), 'Failed to prepare for upload');
         return;
       }
 
-      const reader = new FileReader();
+      // Get current user
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       
-      reader.onload = async (e) => {
-        try {
-          console.log('File read successfully, starting CSV parsing');
-          const text = e.target?.result as string;
-          
-          if (!text) {
-            throw new Error('Failed to read file content');
-          }
-          
-          const transactions = await parseCSV(text);
-          console.log('Filtered completed transactions count:', transactions.length);
-          
-          if (transactions.length === 0) {
-            toast.error('No valid completed transactions found in the CSV');
-            setIsUploading(false);
-            return;
-          }
-      
-          const { data: { session } } = await supabase.auth.getSession();
-          const user = session?.user;
-          console.log('Current user for transaction upload:', user);
-          
-          if (!user) {
-            console.error('No authenticated user found during upload');
-            toast.error('Please sign in to save transactions');
-            setIsUploading(false);
-            return;
-          }
-      
-          console.log('Preparing to save transactions for user:', user.id);
-          const saved = await saveTransactions(transactions, user.id);
-          
-          if (saved) {
-            onFileUpload(transactions);
-            const hasAdjustedRent = transactions.some(t => 
-              t.description?.includes('⚡') && t.description?.toLowerCase().includes('rent')
-            );
-            
-            if (hasAdjustedRent) {
-              toast.success(`Successfully uploaded ${transactions.length} transactions! Rent transaction adjusted.`);
-            } else {
-              toast.success(`Successfully uploaded ${transactions.length} transactions!`);
-            }
-          }
-        } catch (error) {
-          console.error('Error processing file:', error);
-          toast.error('Failed to process file');
-        } finally {
-          setIsUploading(false);
-        }
-      };
+      if (!user) {
+        handleError(new Error('No authenticated user'), 'Please sign in to save transactions');
+        return;
+      }
 
-      reader.onerror = (error) => {
-        console.error('FileReader error:', error);
-        toast.error('Failed to read file');
-        setIsUploading(false);
-      };
-
-      reader.readAsText(file);
+      // Process file and save transactions
+      const transactions = await processFile(file);
+      const saved = await saveTransactions(transactions, user.id);
+      
+      if (saved) {
+        onFileUpload(transactions);
+        const hasAdjustedRent = transactions.some(t => 
+          t.description?.includes('⚡') && t.description?.toLowerCase().includes('rent')
+        );
+        
+        toast.success(
+          hasAdjustedRent 
+            ? `Successfully uploaded ${transactions.length} transactions! Rent transaction adjusted.`
+            : `Successfully uploaded ${transactions.length} transactions!`
+        );
+      }
     } catch (error) {
-      console.error('Unexpected error during file upload:', error);
-      toast.error('An unexpected error occurred');
+      handleError(
+        error as Error,
+        (error as Error).message === 'No valid completed transactions found'
+          ? 'No valid completed transactions found in the CSV'
+          : 'Failed to process file'
+      );
+    } finally {
       setIsUploading(false);
     }
   }, [onFileUpload]);
