@@ -7,6 +7,8 @@ interface UseCreateReminderOptions {
   onSuccess?: () => void;
 }
 
+type NotificationType = "whatsapp" | "email" | "in_app";
+
 export function useCreateReminder({ onSuccess }: UseCreateReminderOptions) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -25,8 +27,8 @@ export function useCreateReminder({ onSuccess }: UseCreateReminderOptions) {
         name: data.name,
         amount: data.amount,
         due_date: data.due_date.toISOString(),
-        reminder_days_before: [7],
-        notification_types: ['email'],
+        reminder_days_before: data.reminder_days_before,
+        notification_types: data.notification_types as NotificationType[],
         recurrence_frequency: data.recurrence_frequency,
         user_id: user.id,
       };

@@ -12,6 +12,15 @@ export function CreateReminderDialog({ open, onOpenChange }: CreateReminderDialo
     onSuccess: () => onOpenChange(false),
   });
 
+  const defaultValues = {
+    name: '',
+    amount: 0,
+    due_day: 1,
+    reminder_days_before: [7],
+    notification_types: ['email'] as ("whatsapp" | "email" | "in_app")[],
+    recurrence_frequency: 'none' as const,
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -20,6 +29,7 @@ export function CreateReminderDialog({ open, onOpenChange }: CreateReminderDialo
         </DialogHeader>
 
         <ReminderForm
+          defaultValues={defaultValues}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
