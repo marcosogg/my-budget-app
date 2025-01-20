@@ -7,15 +7,19 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Category } from '@/types/categorization';
 import { SortOption } from '../hooks/useTransactionSort';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface FilterBarProps {
   categories: Category[];
   onFilterChange: (type: string, value: string | Date | undefined) => void;
   onSortChange: (value: SortOption) => void;
+  onExpensesOnlyChange: (checked: boolean) => void;
   filters: {
     category: string;
     description: string;
     date: Date | undefined;
+    expensesOnly: boolean;
   };
 }
 
@@ -23,9 +27,9 @@ export const FilterBar = ({
   categories, 
   onFilterChange, 
   onSortChange, 
-  filters 
+  filters,
+  onExpensesOnlyChange
 }: FilterBarProps) => {
-  // Filter out uncategorized categories
   const filteredCategories = categories.filter(category => category.type !== 'uncategorized');
 
   return (
@@ -87,6 +91,15 @@ export const FilterBar = ({
           />
         </PopoverContent>
       </Popover>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="expenses-only"
+          checked={filters.expensesOnly}
+          onCheckedChange={onExpensesOnlyChange}
+        />
+        <Label htmlFor="expenses-only">Show Expenses Only</Label>
+      </div>
     </div>
   );
 };

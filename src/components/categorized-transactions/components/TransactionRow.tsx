@@ -65,7 +65,6 @@ export const TransactionRow = ({
         </div>
       </TableCell>
       <TableCell>{transaction.transactions.currency}</TableCell>
-      <TableCell>{transaction.notes}</TableCell>
       <TableCell>
         <Button
           variant="ghost"

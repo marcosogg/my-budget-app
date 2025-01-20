@@ -15,7 +15,12 @@ const CategorizedTransactionsContainer = () => {
   const { categorizedTransactions, isLoading: transactionsLoading, error } = useCategorizedTransactionsData();
   const { updateCategory, isUpdating } = useUpdateCategory();
   
-  const { filters, filteredTransactions, handleFilterChange } = useTransactionFilters(categorizedTransactions);
+  const { 
+    filters, 
+    filteredTransactions, 
+    handleFilterChange, 
+    handleExpensesOnlyChange 
+  } = useTransactionFilters(categorizedTransactions);
   const { sortOption, setSortOption, sortedTransactions } = useTransactionSort(filteredTransactions);
 
   const isLoading = categoriesLoading || transactionsLoading;
@@ -55,6 +60,7 @@ const CategorizedTransactionsContainer = () => {
       onUpdateCategory={handleUpdateCategory}
       filters={filters}
       onFilterChange={handleFilterChange}
+      onExpensesOnlyChange={handleExpensesOnlyChange}
       sortOption={sortOption}
       onSortChange={setSortOption}
       isLoading={isUpdating}
