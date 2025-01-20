@@ -16,6 +16,14 @@ export const formatAmount = (amount: number, currency: string): string => {
   }).format(amount);
 };
 
+export const formatEuroAmount = (amount: number): string => {
+  return formatAmount(amount, 'EUR');
+};
+
+export const formatTransactionCount = (count: number): string => {
+  return new Intl.NumberFormat('en-US').format(count);
+};
+
 export const getTransactionIcon = (amount: number) => {
   if (amount > 0) return <ArrowUpIcon className="h-4 w-4 text-transaction-income" />;
   if (amount < 0) return <ArrowDownIcon className="h-4 w-4 text-transaction-expense" />;
