@@ -361,6 +361,27 @@ export type Database = {
       }
     }
     Views: {
+      mapping_management: {
+        Row: {
+          category_id: string | null
+          category_name: string | null
+          description: string | null
+          is_mapped: boolean | null
+          last_transaction_date: string | null
+          total_amount: number | null
+          transaction_count: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "description_category_mappings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mapping_statistics: {
         Row: {
           category_id: string | null
