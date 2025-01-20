@@ -5,15 +5,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CategorizedTransaction, Category } from '@/types/categorization';
-import { Transaction } from '@/types/transaction';
+import { Category } from '@/types/categorization';
 import { SortOption } from '../hooks/useTransactionSort';
 
 interface FilterBarProps {
-  transactions: (CategorizedTransaction & { 
-    transactions: Transaction, 
-    categories: Category 
-  })[];
   categories: Category[];
   onFilterChange: (type: string, value: string | Date | undefined) => void;
   onSortChange: (value: SortOption) => void;
@@ -24,7 +19,12 @@ interface FilterBarProps {
   };
 }
 
-export const FilterBar = ({ categories, onFilterChange, onSortChange, filters }: FilterBarProps) => {
+export const FilterBar = ({ 
+  categories, 
+  onFilterChange, 
+  onSortChange, 
+  filters 
+}: FilterBarProps) => {
   return (
     <div className="flex flex-wrap gap-4">
       <Select onValueChange={(value: SortOption) => onSortChange(value)}>
