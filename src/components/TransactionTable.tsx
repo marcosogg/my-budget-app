@@ -1,5 +1,4 @@
 import { Transaction } from '@/types/transaction';
-import { format } from 'date-fns';
 import {
   Table,
   TableBody,
@@ -8,51 +7,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDown, ArrowUp, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { 
+  formatDate, 
+  formatAmount, 
+  getTransactionIcon, 
+  getTransactionColor 
+} from '@/lib/formatters';
 
 interface TransactionTableProps {
   transactions: Transaction[];
 }
 
 const TransactionTable = ({ transactions }: TransactionTableProps) => {
-  
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '';
-    try {
-      const date = new Date(dateStr);
-      return format(date, 'dd/MM/yyyy');
-    } catch (error) {
-      console.error('Error parsing date:', dateStr, error);
-      return '';
-    }
-  };
-
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: currency,
-    }).format(amount);
-  };
-
-  const getTransactionIcon = (amount: number) => {
-    if (amount > 0) {
-      return <ArrowUp className="w-4 h-4 text-transaction-income" />;
-    }
-    return <ArrowDown className="w-4 h-4 text-transaction-expense" />;
-  };
-
-  const getAmountColor = (amount: number) => {
-    if (amount > 0) return 'text-transaction-income';
-    if (amount < 0) return 'text-transaction-expense';
-    return 'text-transaction-neutral';
-  };
-
   const isAdjustedTransaction = (description: string | null) => {
     return description?.includes('⚡') ?? false;
   };
@@ -97,7 +70,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     {getTransactionIcon(transaction.amount)}
-                    <span className={getAmountColor(transaction.amount)}>
+                    <span className={getTransactionColor(transaction.amount)}>
                       {formatAmount(Math.abs(transaction.amount), transaction.currency)}
                     </span>
                   </div>
