@@ -1,4 +1,4 @@
-import { Table, TableBody } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useRef, useEffect, useState } from "react";
 import { useCategories } from "@/hooks/useCategories";
 import { useToast } from "@/hooks/use-toast";
