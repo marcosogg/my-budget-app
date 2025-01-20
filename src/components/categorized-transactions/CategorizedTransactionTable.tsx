@@ -23,7 +23,9 @@ interface CategorizedTransactionTableProps {
     date: Date | undefined;
   };
   onFilterChange: (type: string, value: string | Date | undefined) => void;
+  sortOption: SortOption;
   onSortChange: (value: SortOption) => void;
+  isLoading: boolean;
 }
 
 const CategorizedTransactionTable = ({
@@ -34,8 +36,14 @@ const CategorizedTransactionTable = ({
   onUpdateCategory,
   filters,
   onFilterChange,
+  sortOption,
   onSortChange,
+  isLoading,
 }: CategorizedTransactionTableProps) => {
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-[200px]">Updating...</div>;
+  }
+
   return (
     <div className="space-y-4">
       <FilterBar
