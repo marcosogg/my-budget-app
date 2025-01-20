@@ -216,6 +216,24 @@ export type Database = {
           },
         ]
       }
+      mappings_backup: {
+        Row: {
+          category_name: string | null
+          description: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category_name?: string | null
+          description?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category_name?: string | null
+          description?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
