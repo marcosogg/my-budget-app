@@ -1,52 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Transaction } from "@/types/transaction";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { FilterBar } from "./transactions/components/FilterBar";
-import { useTransactionFilters } from "./transactions/hooks/useTransactionFilters";
 import CategorizedTransactionsContainer from "@/components/categorized-transactions/CategorizedTransactionsContainer";
 
 const Transactions = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const { data: transactions = [], isLoading, error } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('completed_date', { ascending: false });
-
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load transactions",
-        });
-        throw error;
-      }
-
-      return data as Transaction[];
-    },
-  });
-
-  const {
-    filterDescription,
-    setFilterDescription,
-    filterDate,
-    setFilterDate,
-    sortOption,
-    setSortOption,
-    filteredTransactions,
-  } = useTransactionFilters(transactions);
-
-  if (isLoading) {
-    return <div className="container py-8">Loading...</div>;
-  }
 
   return (
     <div className="container py-8 space-y-8">
@@ -63,21 +21,7 @@ const Transactions = () => {
         <div className="w-[100px]" />
       </div>
 
-      <FilterBar
-        description={filterDescription}
-        onDescriptionChange={setFilterDescription}
-        date={filterDate}
-        onDateChange={setFilterDate}
-        onSortChange={setSortOption}
-      />
-
-      {filteredTransactions.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No transactions found matching your criteria.</p>
-        </div>
-      ) : (
-        <CategorizedTransactionsContainer />
-      )}
+      <CategorizedTransactionsContainer />
     </div>
   );
 };
