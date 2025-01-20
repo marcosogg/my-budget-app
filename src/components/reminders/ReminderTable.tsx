@@ -1,4 +1,4 @@
-import { Table, TableBody } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReminderTableHeader } from "./table/ReminderTableHeader";
 import { ReminderTableRow } from "./table/ReminderTableRow";
