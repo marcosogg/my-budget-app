@@ -23,7 +23,7 @@ export interface ReminderFormData {
 interface ReminderFormProps {
   defaultValues: ReminderFormData;
   isSubmitting: boolean;
-  onSubmit: (data: ReminderFormData) => void;
+  onSubmit: (data: ReminderFormData & { due_date: Date }) => void;
   onCancel: () => void;
 }
 
