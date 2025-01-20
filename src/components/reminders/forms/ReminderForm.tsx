@@ -9,20 +9,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DueDayInput } from "./DueDayInput";
-import { NotificationOptions } from "./NotificationOptions";
+import { Switch } from "@/components/ui/switch";
 
 interface ReminderFormData {
   name: string;
   amount: number;
   due_day: number;
   reminder_days_before: number[];
-  notification_types: string[];
-  recurrence_frequency: 'none' | 'monthly' | 'yearly';
+  notification_types: ("whatsapp" | "email" | "in_app")[];
+  recurrence_frequency: 'none' | 'monthly';
 }
 
 interface ReminderFormProps {
-  defaultValues: Partial<ReminderFormData>;
+  defaultValues: ReminderFormData;
   isSubmitting: boolean;
   onSubmit: (data: any) => void;
   onCancel: () => void;
@@ -35,19 +34,10 @@ export function ReminderForm({
   onCancel 
 }: ReminderFormProps) {
   const form = useForm<ReminderFormData>({
-    defaultValues: {
-      name: '',
-      amount: 0,
-      due_day: 1,
-      reminder_days_before: [7],
-      notification_types: ['email'],
-      recurrence_frequency: 'none',
-      ...defaultValues,
-    },
+    defaultValues,
   });
 
   const handleSubmit = (data: ReminderFormData) => {
-    // Convert the due_day to a full date for the API
     const today = new Date();
     const dueDate = new Date(today.getFullYear(), today.getMonth(), data.due_day);
     
@@ -98,8 +88,53 @@ export function ReminderForm({
           )}
         />
 
-        <DueDayInput form={form} />
-        <NotificationOptions form={form} />
+        <FormField
+          control={form.control}
+          name="due_day"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Due Day of Month (1-31)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min={1}
+                  max={31}
+                  {...field}
+                  onChange={e => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 1 && value <= 31) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="recurrence_frequency"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Monthly Recurring</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Automatically create this reminder every month
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value === 'monthly'}
+                  onCheckedChange={(checked) => 
+                    field.onChange(checked ? 'monthly' : 'none')
+                  }
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-end gap-2">
           <Button
