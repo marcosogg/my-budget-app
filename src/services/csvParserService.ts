@@ -21,29 +21,24 @@ const RENT_AMOUNT = 2200;
 const ADJUSTED_RENT_AMOUNT = 1000;
 
 const isRentTransaction = (transaction: Transaction): boolean => {
-  // Early return if amount doesn't match
-  if (Math.abs(transaction.amount) !== RENT_AMOUNT) {
-    return false;
-  }
-
-  // Check if description matches any keywords (case insensitive)
   const description = transaction.description?.toLowerCase() || '';
-  const hasRentKeyword = RENT_KEYWORDS.some(keyword => 
-    description.includes(keyword.toLowerCase())
-  );
 
-  const isMatch = hasRentKeyword && 
-    transaction.type.toLowerCase() === 'transfer';
+  // Check if the description contains "trading places" (case-insensitive)
+  const hasTradingPlaces = description.includes('trading places');
 
+  // Check if the amount is -2200 (no need for Math.abs)
+  const isCorrectAmount = transaction.amount === -RENT_AMOUNT;
+
+  // Log the individual checks for debugging
   console.log('Rent transaction check:', {
     description,
+    hasTradingPlaces,
     amount: transaction.amount,
-    type: transaction.type,
-    isMatch,
-    hasRentKeyword
+    isCorrectAmount,
   });
 
-  return isMatch;
+  // Return true only if both conditions are met
+  return hasTradingPlaces && isCorrectAmount;
 };
 
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
