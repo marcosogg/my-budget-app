@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, X, Loader2 } from "lucide-react";
 import { formatEuroDate } from "@/utils/formatters";
-import { Badge } from "@/components/ui/badge";
 import { Category } from "@/types/categorization";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditableRowProps {
   mapping: {
@@ -32,11 +34,62 @@ export function EditableRow({
   categories,
   isSaving,
   inputRef,
-  onSave,
   onCancel,
   onEditValuesChange,
   onKeyDown,
 }: EditableRowProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleSave = async () => {
+    if (!editValues.description.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Description cannot be empty",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const { error } = await supabase
+        .from("description_category_mappings")
+        .update({
+          description: editValues.description,
+          category_id: editValues.category_id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("description", mapping.description)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      toast({ 
+        title: "Success", 
+        description: "Mapping and associated transactions have been updated" 
+      });
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["description-mappings"] });
+      queryClient.invalidateQueries({ queryKey: ["categorizedTransactions"] });
+      
+      onCancel(); // Close edit mode
+    } catch (error) {
+      console.error('Error saving mapping:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred while saving the mapping",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <TableRow>
       <TableCell className="font-medium">
@@ -78,7 +131,7 @@ export function EditableRow({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onSave}
+            onClick={handleSave}
             disabled={isSaving}
           >
             {isSaving ? (

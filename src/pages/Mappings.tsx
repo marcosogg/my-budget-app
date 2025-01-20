@@ -63,8 +63,11 @@ const Mappings = () => {
 
   const handleEdit = (mapping: Mapping) => {
     console.log("Editing mapping:", mapping);
-    setSelectedMapping(mapping);
-    setIsAddEditOpen(true);
+    // Only open dialog for new mappings
+    if (!mapping.id) {
+      setSelectedMapping(mapping);
+      setIsAddEditOpen(true);
+    }
   };
 
   const handleDelete = (mappingId: string) => {
