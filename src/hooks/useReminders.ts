@@ -20,6 +20,10 @@ export function useReminders() {
 
   const deleteReminder = useMutation({
     mutationFn: async (reminderId: string) => {
+      if (!reminderId) {
+        throw new Error("Reminder ID is required");
+      }
+
       const { error } = await supabase
         .from("bill_reminders")
         .delete()

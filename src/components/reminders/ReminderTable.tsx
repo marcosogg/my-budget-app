@@ -18,7 +18,7 @@ interface ReminderTableProps {
   isLoading?: boolean;
   error?: Error | null;
   onEdit: (reminder: BillReminder) => void;
-  onDelete: (reminderId: string) => void;
+  onDelete: (reminder: BillReminder) => void;
   onTogglePaid: (reminderId: string, isPaid: boolean) => void;
 }
 
@@ -112,7 +112,7 @@ export function ReminderTable({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onDelete(reminder.id)}
+                  onClick={() => onDelete(reminder)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
