@@ -74,7 +74,15 @@ const FileUpload = ({ onFileUpload }: FileUploadProps) => {
           
           if (saved) {
             onFileUpload(transactions);
-            toast.success(`Successfully uploaded ${transactions.length} transactions!`);
+            const hasAdjustedRent = transactions.some(t => 
+              t.description?.includes('⚡') && t.description?.toLowerCase().includes('rent')
+            );
+            
+            if (hasAdjustedRent) {
+              toast.success(`Successfully uploaded ${transactions.length} transactions! Rent transaction adjusted.`);
+            } else {
+              toast.success(`Successfully uploaded ${transactions.length} transactions!`);
+            }
           }
         } catch (error) {
           console.error('Error processing file:', error);

@@ -8,7 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Zap } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -47,6 +53,10 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
     return 'text-transaction-neutral';
   };
 
+  const isAdjustedTransaction = (description: string | null) => {
+    return description?.includes('⚡') ?? false;
+  };
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -67,7 +77,23 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
                 <TableCell className="font-medium">{transaction.type}</TableCell>
                 <TableCell>{transaction.product}</TableCell>
                 <TableCell>{formatDate(transaction.completed_date)}</TableCell>
-                <TableCell>{transaction.description}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {transaction.description?.replace('⚡', '')}
+                    {isAdjustedTransaction(transaction.description) && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Zap className="h-4 w-4 text-yellow-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Rent amount adjusted during import</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     {getTransactionIcon(transaction.amount)}

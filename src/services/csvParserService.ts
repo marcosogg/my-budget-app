@@ -15,6 +15,20 @@ const headerMap: { [key: string]: string } = {
   'Balance': 'balance'
 };
 
+const adjustRentTransaction = (transaction: Transaction): Transaction => {
+  if (
+    transaction.description?.toLowerCase().includes('rent') &&
+    transaction.amount === 2200
+  ) {
+    return {
+      ...transaction,
+      amount: 1000,
+      description: `${transaction.description} ⚡`, // Adding indicator for adjusted transactions
+    };
+  }
+  return transaction;
+};
+
 export const parseCSV = (text: string): Promise<Transaction[]> => {
   return new Promise((resolve, reject) => {
     parse(text, {
@@ -40,7 +54,8 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
       },
       complete: (results) => {
         const transactions = (results.data as Transaction[])
-          .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date);
+          .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
+          .map(adjustRentTransaction); // Apply rent adjustment to each transaction
         resolve(transactions);
       },
       error: (error) => {
