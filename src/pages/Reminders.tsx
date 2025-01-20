@@ -2,13 +2,16 @@ import { useState } from "react";
 import { ReminderHeader } from "@/components/reminders/ReminderHeader";
 import { ReminderTable } from "@/components/reminders/ReminderTable";
 import { ReminderDialog } from "@/components/reminders/ReminderDialog";
+import { DeleteReminderDialog } from "@/components/reminders/DeleteReminderDialog";
 import { useReminders } from "@/hooks/useReminders";
 
 export default function Reminders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showPaidOnly, setShowPaidOnly] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReminder, setSelectedReminder] = useState<any>(null);
+  const [reminderToDelete, setReminderToDelete] = useState<any>(null);
 
   const { reminders, isLoading, error, deleteReminder, togglePaid } = useReminders();
 
@@ -23,9 +26,16 @@ export default function Reminders() {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (reminderId: string) => {
-    if (window.confirm("Are you sure you want to delete this reminder?")) {
-      deleteReminder(reminderId);
+  const handleDelete = (reminder: any) => {
+    setReminderToDelete(reminder);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (reminderToDelete) {
+      await deleteReminder(reminderToDelete.id);
+      setDeleteDialogOpen(false);
+      setReminderToDelete(null);
     }
   };
 
@@ -59,6 +69,14 @@ export default function Reminders() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         reminder={selectedReminder}
+      />
+
+      <DeleteReminderDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        isRecurring={reminderToDelete?.recurrence_frequency !== 'none'}
+        isRecurringInstance={reminderToDelete?.is_recurring_instance}
       />
     </div>
   );
