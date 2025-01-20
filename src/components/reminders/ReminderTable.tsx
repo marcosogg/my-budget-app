@@ -1,8 +1,8 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Check } from "lucide-react";
-import { formatEuroDate } from "@/utils/formatters";
+import { Table, TableBody } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReminderTableHeader } from "./table/ReminderTableHeader";
+import { ReminderTableRow } from "./table/ReminderTableRow";
+import { ReminderTableEmpty } from "./table/ReminderTableEmpty";
 
 interface BillReminder {
   id: string;
@@ -10,7 +10,7 @@ interface BillReminder {
   amount: number;
   due_date: string;
   is_paid: boolean;
-  recurrence_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_frequency: 'none' | 'monthly';
 }
 
 interface ReminderTableProps {
@@ -41,16 +41,7 @@ export function ReminderTable({
   if (isLoading) {
     return (
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Due Date</TableHead>
-            <TableHead>Recurrence</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+        <ReminderTableHeader />
         <TableBody>
           {[...Array(5)].map((_, index) => (
             <TableRow key={index}>
@@ -69,64 +60,18 @@ export function ReminderTable({
 
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Due Date</TableHead>
-          <TableHead>Recurrence</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="w-[100px]">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
+      <ReminderTableHeader />
       <TableBody>
         {reminders?.map((reminder) => (
-          <TableRow key={reminder.id}>
-            <TableCell className="font-medium">{reminder.name}</TableCell>
-            <TableCell>
-              {new Intl.NumberFormat('de-DE', { 
-                style: 'currency', 
-                currency: 'EUR' 
-              }).format(reminder.amount)}
-            </TableCell>
-            <TableCell>{formatEuroDate(reminder.due_date)}</TableCell>
-            <TableCell className="capitalize">{reminder.recurrence_frequency}</TableCell>
-            <TableCell>
-              <Button
-                variant={reminder.is_paid ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTogglePaid(reminder.id, !reminder.is_paid)}
-              >
-                {reminder.is_paid ? "Paid" : "Unpaid"}
-              </Button>
-            </TableCell>
-            <TableCell>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(reminder)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(reminder)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
+          <ReminderTableRow
+            key={reminder.id}
+            reminder={reminder}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onTogglePaid={onTogglePaid}
+          />
         ))}
-        {reminders.length === 0 && (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-              No reminders found
-            </TableCell>
-          </TableRow>
-        )}
+        {reminders.length === 0 && <ReminderTableEmpty />}
       </TableBody>
     </Table>
   );
