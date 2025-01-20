@@ -24,10 +24,15 @@ export const categoryService = {
   async updateTransactionCategory(
     transactionId: string,
     categoryId: string,
-    userId: string,
-    description: string | null
   ): Promise<void> {
-    // Update categorized transaction
+    const { data: transaction, error: fetchError } = await supabase
+      .from('categorized_transactions')
+      .select('user_id, transactions(description)')
+      .eq('id', transactionId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
     const { error: updateError } = await supabase
       .from('categorized_transactions')
       .update({ category_id: categoryId })
@@ -36,13 +41,13 @@ export const categoryService = {
     if (updateError) throw updateError;
 
     // Only update mapping if description exists
-    if (description) {
+    if (transaction?.transactions?.description) {
       const { error: mappingError } = await supabase
         .from('description_category_mappings')
         .upsert({
-          description: description,
+          description: transaction.transactions.description,
           category_id: categoryId,
-          user_id: userId,
+          user_id: transaction.user_id,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'description,user_id',

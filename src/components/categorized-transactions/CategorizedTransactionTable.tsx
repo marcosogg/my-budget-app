@@ -12,17 +12,14 @@ import { useTransactionFilters } from './hooks/useTransactionFilters';
 import { useTransactionSort } from './hooks/useTransactionSort';
 import { FilterBar } from './components/FilterBar';
 import { TransactionRow } from './components/TransactionRow';
+import { useUpdateCategory } from '@/hooks/useUpdateCategory';
 
 const CategorizedTransactionTable = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const { data: categories = [] } = useCategories();
-  const { 
-    categorizedTransactions, 
-    isLoading, 
-    error, 
-    updateCategory 
-  } = useCategorizedTransactionsData();
+  const { categorizedTransactions, isLoading, error } = useCategorizedTransactionsData();
+  const { updateCategory } = useUpdateCategory();
   
   const { filters, filteredTransactions, handleFilterChange } = useTransactionFilters(categorizedTransactions);
   const { sortOption, setSortOption, sortedTransactions } = useTransactionSort(filteredTransactions);
