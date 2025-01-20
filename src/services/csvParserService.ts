@@ -12,7 +12,7 @@ const headerMap: { [key: string]: string } = {
   'Fee': 'fee',
   'Currency': 'currency',
   'State': 'state',
-  'Balance': 'balance'
+  'Balance': 'balance',
 };
 
 // Rent transaction identification configuration
@@ -42,13 +42,21 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
     parse(text, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => headerMap[header] || header,
+      transformHeader: (header) => {
+        const transformedHeader = headerMap[header] || header;
+        console.log('Transforming header:', header, 'to:', transformedHeader);
+        return transformedHeader;
+      },
       transform: (value, field) => {
+        console.log(`Raw value for field ${field}:`, value);
         if (['amount', 'fee', 'balance'].includes(field)) {
-          return parseFloat(value.replace(/,/g, ''));
+          const numericValue = parseFloat(value.replace(/,/g, ''));
+          console.log(`Parsed numeric value for field ${field}:`, numericValue);
+          return isNaN(numericValue) ? null : numericValue; // Handle NaN cases
         }
         if (['completed_date', 'started_date'].includes(field)) {
           const parsedDate = parseCustomDate(value);
+          console.log(`Parsed date for field ${field}:`, parsedDate);
           if (!parsedDate) {
             console.error('Failed to parse date:', value);
             return null;
@@ -58,16 +66,36 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
         return value;
       },
       complete: (results) => {
-        const transactions = (results.data as Transaction[])
-          .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
-          .map(adjustRentTransaction);
-        console.log('Parsed transactions:', transactions);
+        const transactions = (results.data as any[]) // Using any[] to handle type conflicts
+          .filter(row => row.state === 'COMPLETED' && row.completed_date && row.started_date)
+          .map((row: { [key: string]: any }): Transaction => {
+            const transaction: Transaction = {
+              id: row.id,
+              user_id: row.user_id,
+              type: row.type,
+              product: row.product,
+              started_date: row.started_date,
+              completed_date: row.completed_date,
+              description: row.description,
+              amount: row.amount,
+              fee: row.fee,
+              currency: row.currency,
+              state: row.state,
+              balance: row.balance,
+            };
+
+            const adjustedTransaction = adjustRentTransaction(transaction);
+            console.log('Transaction after adjustment:', adjustedTransaction);
+            return adjustedTransaction;
+          });
+
+        console.log('Filtered completed transactions count:', transactions.length);
         resolve(transactions);
       },
       error: (error) => {
         console.error('CSV parsing error:', error);
         reject(error);
-      }
+      },
     });
   });
 };
