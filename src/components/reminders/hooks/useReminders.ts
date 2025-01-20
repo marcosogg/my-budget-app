@@ -13,7 +13,11 @@ export function useReminders() {
         .select("*")
         .order("due_date", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching reminders:", error);
+        throw new Error("Failed to load reminders. Please try again later.");
+      }
+      
       return data;
     },
   });
@@ -31,7 +35,10 @@ export function useReminders() {
           .delete()
           .eq("parent_reminder_id", reminder.id);
 
-        if (childDeletionError) throw childDeletionError;
+        if (childDeletionError) {
+          console.error("Error deleting child reminders:", childDeletionError);
+          throw new Error("Failed to delete recurring reminder instances");
+        }
       }
 
       // Now delete the reminder itself
@@ -40,15 +47,18 @@ export function useReminders() {
         .delete()
         .eq("id", reminder.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting reminder:", error);
+        throw new Error("Failed to delete reminder");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bill-reminders"] });
       toast.success("Reminder deleted successfully");
     },
     onError: (error) => {
-      console.error("Error deleting reminder:", error);
-      toast.error("Failed to delete reminder");
+      console.error("Error in delete mutation:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete reminder");
     },
   });
 
@@ -59,15 +69,18 @@ export function useReminders() {
         .update({ is_paid: isPaid })
         .eq("id", reminderId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating reminder paid status:", error);
+        throw new Error("Failed to update reminder status");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bill-reminders"] });
       toast.success("Reminder updated successfully");
     },
     onError: (error) => {
-      console.error("Error updating reminder:", error);
-      toast.error("Failed to update reminder");
+      console.error("Error in toggle paid mutation:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to update reminder");
     },
   });
 

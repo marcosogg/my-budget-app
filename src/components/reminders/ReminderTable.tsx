@@ -1,5 +1,7 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { ReminderTableHeader } from "./table/ReminderTableHeader";
 import { ReminderTableRow } from "./table/ReminderTableRow";
 import { ReminderTableEmpty } from "./table/ReminderTableEmpty";
@@ -32,9 +34,12 @@ export function ReminderTable({
 }: ReminderTableProps) {
   if (error) {
     return (
-      <div className="text-center p-4 text-red-500">
-        Error loading reminders: {error.message}
-      </div>
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading reminders: {error.message}
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -43,8 +48,8 @@ export function ReminderTable({
       <Table>
         <ReminderTableHeader />
         <TableBody>
-          {[...Array(5)].map((_, index) => (
-            <TableRow key={index}>
+          {[...Array(3)].map((_, index) => (
+            <TableRow key={index} className="animate-pulse">
               <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
               <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
               <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
@@ -58,11 +63,22 @@ export function ReminderTable({
     );
   }
 
+  if (!reminders?.length) {
+    return (
+      <Table>
+        <ReminderTableHeader />
+        <TableBody>
+          <ReminderTableEmpty />
+        </TableBody>
+      </Table>
+    );
+  }
+
   return (
     <Table>
       <ReminderTableHeader />
       <TableBody>
-        {reminders?.map((reminder) => (
+        {reminders.map((reminder) => (
           <ReminderTableRow
             key={reminder.id}
             reminder={reminder}
@@ -71,7 +87,6 @@ export function ReminderTable({
             onTogglePaid={onTogglePaid}
           />
         ))}
-        {reminders.length === 0 && <ReminderTableEmpty />}
       </TableBody>
     </Table>
   );
