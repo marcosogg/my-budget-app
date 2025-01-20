@@ -6,6 +6,17 @@ import { DeleteMappingDialog } from "@/components/mappings/DeleteMappingDialog";
 import { MappingTable } from "@/components/mappings/MappingTable";
 import { MappingHeader } from "@/components/mappings/MappingHeader";
 
+interface MappingManagementRow {
+  description: string;
+  category_id: string;
+  category_name: string;
+  transaction_count: number;
+  last_transaction_date: string | null;
+  total_amount: number;
+  user_id: string;
+  is_mapped: boolean;
+}
+
 interface Mapping {
   id: string;
   description: string;
@@ -39,8 +50,8 @@ const Mappings = () => {
       }
 
       console.log("Received mapping data:", mappingsData);
-      return mappingsData?.map(mapping => ({
-        id: mapping.id || crypto.randomUUID(), // Generate an ID if none exists
+      return (mappingsData as MappingManagementRow[])?.map(mapping => ({
+        id: crypto.randomUUID(), // Generate a unique ID for each mapping
         description: mapping.description,
         category_id: mapping.category_id,
         category_name: mapping.category_name,
