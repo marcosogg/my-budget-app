@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { FilterBar } from "./transactions/components/FilterBar";
 import { useTransactionFilters } from "./transactions/hooks/useTransactionFilters";
+import CategorizedTransactionTable from "@/components/categorized-transactions/CategorizedTransactionTable";
 
 const Transactions = () => {
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ const Transactions = () => {
           <p className="text-muted-foreground">No transactions found matching your criteria.</p>
         </div>
       ) : (
-        <TransactionTable transactions={filteredTransactions} />
+        <CategorizedTransactionTable />
       )}
     </div>
   );
