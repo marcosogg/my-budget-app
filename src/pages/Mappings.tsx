@@ -29,7 +29,7 @@ const Mappings = () => {
     queryFn: async () => {
       console.log("Fetching mapping statistics...");
       const { data: mappingsData, error: fetchError } = await supabase
-        .from("mapping_statistics")
+        .from("mapping_management")
         .select("*")
         .order('description');
 
@@ -40,12 +40,12 @@ const Mappings = () => {
 
       console.log("Received mapping data:", mappingsData);
       return mappingsData?.map(mapping => ({
-        id: mapping.id,
+        id: mapping.id || crypto.randomUUID(), // Generate an ID if none exists
         description: mapping.description,
         category_id: mapping.category_id,
         category_name: mapping.category_name,
         transaction_count: Number(mapping.transaction_count),
-        last_used_date: mapping.last_used_date
+        last_used_date: mapping.last_transaction_date
       })) || [];
     },
   });
