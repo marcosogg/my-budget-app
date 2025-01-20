@@ -22,7 +22,6 @@ interface EditableRowProps {
   categories: Category[];
   isSaving: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
-  onSave: () => void;
   onCancel: () => void;
   onEditValuesChange: (values: { description: string; category_id: string }) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
@@ -65,7 +64,7 @@ export function EditableRow({
           category_id: editValues.category_id,
           updated_at: new Date().toISOString(),
         })
-        .eq("description", mapping.description)
+        .eq("id", mapping.id) // Changed to use mapping.id instead of description
         .eq("user_id", user.id);
 
       if (error) throw error;
