@@ -3,13 +3,13 @@ export interface Transaction {
   user_id: string;
   type: string;
   product: string | null;
-  started_date: string | null;
-  completed_date: string | null;
+  started_date: Date | null;
+  completed_date: Date | null;
   description: string | null;
   amount: number;
   fee: number | null;
   currency: string;
   state: string | null;
-  balance: number;
+  balance: number | null;
   created_at: string;
 }

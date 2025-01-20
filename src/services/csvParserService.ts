@@ -12,7 +12,7 @@ const headerMap: { [key: string]: string } = {
   'Fee': 'fee',
   'Currency': 'currency',
   'State': 'state',
-  'Balance': 'balance',
+  'Balance': 'balance'
 };
 
 // Rent transaction identification configuration
@@ -52,7 +52,7 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
         if (['amount', 'fee', 'balance'].includes(field)) {
           const numericValue = parseFloat(value.replace(/,/g, ''));
           console.log(`Parsed numeric value for field ${field}:`, numericValue);
-          return isNaN(numericValue) ? null : numericValue; // Handle NaN cases
+          return isNaN(numericValue) ? null : numericValue;
         }
         if (['completed_date', 'started_date'].includes(field)) {
           const parsedDate = parseCustomDate(value);
@@ -66,12 +66,12 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
         return value;
       },
       complete: (results) => {
-        const transactions = (results.data as any[]) // Using any[] to handle type conflicts
+        const transactions = (results.data as any[])
           .filter(row => row.state === 'COMPLETED' && row.completed_date && row.started_date)
-          .map((row: { [key: string]: any }): Transaction => {
+          .map((row: { [key: string]: any }, index): Transaction => {
             const transaction: Transaction = {
-              id: row.id,
-              user_id: row.user_id,
+              id: generateUniqueId(), // Generate a unique ID for each transaction
+              user_id: 'e8643c1c-e7a1-4c6b-b010-8476b179b7ed', // Replace with actual user ID
               type: row.type,
               product: row.product,
               started_date: row.started_date,
@@ -99,3 +99,11 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
     });
   });
 };
+
+// Function to generate a unique ID (consider using a library like `uuid` in a real app)
+function generateUniqueId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
