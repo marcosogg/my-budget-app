@@ -15,28 +15,44 @@ const headerMap: { [key: string]: string } = {
   'Balance': 'balance'
 };
 
+// Rent transaction identification configuration
+const RENT_KEYWORDS = ['trading places', 'rent'];
+const RENT_AMOUNT = 2200;
+const ADJUSTED_RENT_AMOUNT = 1000;
+
 const isRentTransaction = (transaction: Transaction): boolean => {
-  console.log('Checking rent transaction:', {
-    description: transaction.description,
+  // Early return if amount doesn't match
+  if (Math.abs(transaction.amount) !== RENT_AMOUNT) {
+    return false;
+  }
+
+  // Check if description matches any keywords (case insensitive)
+  const description = transaction.description?.toLowerCase() || '';
+  const hasRentKeyword = RENT_KEYWORDS.some(keyword => 
+    description.includes(keyword.toLowerCase())
+  );
+
+  const isMatch = hasRentKeyword && 
+    transaction.type.toLowerCase() === 'transfer';
+
+  console.log('Rent transaction check:', {
+    description,
     amount: transaction.amount,
-    type: transaction.type
+    type: transaction.type,
+    isMatch,
+    hasRentKeyword
   });
 
-  const isMatch = transaction.description?.toLowerCase().includes('trading places') &&
-    Math.abs(transaction.amount) === 2200 &&
-    transaction.type.toLowerCase() === 'transfer';
-  
-  console.log('Is rent transaction match?', isMatch);
   return isMatch;
 };
 
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
   if (isRentTransaction(transaction)) {
-    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', -1000);
+    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', -ADJUSTED_RENT_AMOUNT);
     return {
       ...transaction,
-      amount: -1000, // Keep the negative sign for expenses
-      description: `${transaction.description} ⚡`, // Adding indicator for adjusted transactions
+      amount: -ADJUSTED_RENT_AMOUNT, // Keep negative sign for expenses
+      description: `${transaction.description} ⚡ (adjusted)`, // Adding indicators
     };
   }
   return transaction;
@@ -68,7 +84,7 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
       complete: (results) => {
         const transactions = (results.data as Transaction[])
           .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
-          .map(adjustRentTransaction); // Apply rent adjustment to each transaction
+          .map(adjustRentTransaction);
         console.log('Filtered completed transactions count:', transactions.length);
         resolve(transactions);
       },
