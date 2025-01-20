@@ -15,11 +15,16 @@ const headerMap: { [key: string]: string } = {
   'Balance': 'balance'
 };
 
+const isRentTransaction = (transaction: Transaction): boolean => {
+  return (
+    transaction.description?.toLowerCase().includes('trading places') &&
+    transaction.amount === 2200 &&
+    transaction.type.toLowerCase() === 'transfer'
+  );
+};
+
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
-  if (
-    transaction.description?.toLowerCase().includes('rent') &&
-    transaction.amount === 2200
-  ) {
+  if (isRentTransaction(transaction)) {
     return {
       ...transaction,
       amount: 1000,
