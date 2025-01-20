@@ -9,13 +9,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DueDayInput } from "./DueDayInput";
+import { NotificationOptions } from "./NotificationOptions";
 
 interface ReminderFormData {
   name: string;
@@ -29,15 +24,9 @@ interface ReminderFormData {
 interface ReminderFormProps {
   defaultValues: Partial<ReminderFormData>;
   isSubmitting: boolean;
-  onSubmit: (data: any) => void; // Using any temporarily to match parent component
+  onSubmit: (data: any) => void;
   onCancel: () => void;
 }
-
-const recurrenceOptions = [
-  { value: 'none', label: 'No recurrence' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-];
 
 export function ReminderForm({ 
   defaultValues, 
@@ -109,56 +98,8 @@ export function ReminderForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="due_day"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Due Day of Month</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  min={1}
-                  max={31}
-                  {...field}
-                  onChange={e => {
-                    const value = parseInt(e.target.value);
-                    if (value >= 1 && value <= 31) {
-                      field.onChange(value);
-                    }
-                  }}
-                  placeholder="Day of month (1-31)" 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="recurrence_frequency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recurrence</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select recurrence" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {recurrenceOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <DueDayInput form={form} />
+        <NotificationOptions form={form} />
 
         <div className="flex justify-end gap-2">
           <Button
