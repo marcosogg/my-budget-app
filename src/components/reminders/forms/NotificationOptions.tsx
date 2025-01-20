@@ -15,7 +15,6 @@ interface NotificationOptionsProps {
 const recurrenceOptions = [
   { value: 'none', label: 'No recurrence' },
   { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
 ];
 
 export function NotificationOptions({ form }: NotificationOptionsProps) {
