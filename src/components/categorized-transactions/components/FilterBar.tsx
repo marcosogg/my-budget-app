@@ -25,6 +25,9 @@ export const FilterBar = ({
   onSortChange, 
   filters 
 }: FilterBarProps) => {
+  // Filter out uncategorized categories
+  const filteredCategories = categories.filter(category => category.type !== 'uncategorized');
+
   return (
     <div className="flex flex-wrap gap-4">
       <Select onValueChange={(value: SortOption) => onSortChange(value)}>
@@ -47,7 +50,7 @@ export const FilterBar = ({
           <SelectValue placeholder="Filter by Category" />
         </SelectTrigger>
         <SelectContent>
-          {categories.map((category) => (
+          {filteredCategories.map((category) => (
             <SelectItem key={category.id} value={category.name}>
               {category.name}
             </SelectItem>
