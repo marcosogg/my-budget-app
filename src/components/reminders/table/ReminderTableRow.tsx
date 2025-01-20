@@ -2,7 +2,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { formatEuroDate } from "@/utils/formatters";
-import { addMonths } from "date-fns";
+import { getNextDueDate } from "../utils/dateUtils";
 
 interface BillReminder {
   id: string;
@@ -26,12 +26,6 @@ export function ReminderTableRow({
   onDelete,
   onTogglePaid,
 }: ReminderTableRowProps) {
-  const getNextDueDate = (dueDate: string, frequency: 'none' | 'monthly') => {
-    if (frequency === 'none') return '-';
-    const nextDate = addMonths(new Date(dueDate), 1);
-    return formatEuroDate(nextDate.toISOString());
-  };
-
   return (
     <TableRow>
       <TableCell className="font-medium">{reminder.name}</TableCell>

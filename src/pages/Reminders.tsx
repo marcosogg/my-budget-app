@@ -3,7 +3,7 @@ import { ReminderHeader } from "@/components/reminders/ReminderHeader";
 import { ReminderTable } from "@/components/reminders/ReminderTable";
 import { ReminderDialog } from "@/components/reminders/ReminderDialog";
 import { DeleteReminderDialog } from "@/components/reminders/DeleteReminderDialog";
-import { useReminders } from "@/hooks/useReminders";
+import { useReminders } from "@/components/reminders/hooks/useReminders";
 
 export default function Reminders() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +33,7 @@ export default function Reminders() {
 
   const handleConfirmDelete = async () => {
     if (reminderToDelete) {
-      await deleteReminder(reminderToDelete.id);
+      await deleteReminder(reminderToDelete);
       setDeleteDialogOpen(false);
       setReminderToDelete(null);
     }
