@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LucideIcon } from 'lucide-react';
-import { formatEuroAmount, formatTransactionCount } from '@/utils/formatters';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatCardProps {
   title: string;
@@ -12,7 +12,7 @@ interface StatCardProps {
   gradientTo: string;
   iconColor: string;
   badgeColor: string;
-  onClick: () => void;
+  onClick?: () => void;
   isLoading?: boolean;
 }
 
@@ -30,45 +30,41 @@ export const StatCard = ({
 }: StatCardProps) => {
   if (isLoading) {
     return (
-      <Card className={`overflow-hidden border-none bg-gradient-to-br from-${gradientFrom} to-${gradientTo} shadow-lg`}>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-24" />
-            <Icon className={`h-4 w-4 ${iconColor}`} />
-          </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-4 w-24" />
-          </div>
+          <Skeleton className="h-7 w-28 mb-1" />
+          <Skeleton className="h-4 w-16" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className={`overflow-hidden border-none bg-gradient-to-br from-${gradientFrom} to-${gradientTo} shadow-lg transition-all hover:shadow-xl`}>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
-          <Icon className={`h-4 w-4 ${iconColor}`} />
-        </div>
+    <Card
+      className={cn(
+        "hover:shadow-md transition-shadow cursor-pointer",
+        onClick && "hover:cursor-pointer"
+      )}
+      onClick={onClick}
+    >
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className={cn("h-4 w-4", iconColor)} />
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div className="text-3xl font-bold tracking-tight">
-            {formatEuroAmount(amount)}
-          </div>
-          <button
-            onClick={onClick}
-            className={`inline-flex items-center rounded-full bg-${badgeColor}/10 px-2.5 py-0.5 text-xs font-semibold text-${badgeColor} transition-colors hover:bg-${badgeColor}/20 cursor-pointer`}
-          >
-            {formatTransactionCount(count)} transactions
-          </button>
+        <div className="text-2xl font-bold">
+          {new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR',
+          }).format(amount)}
         </div>
+        <p className="text-xs text-muted-foreground">
+          {count} transaction{count !== 1 ? 's' : ''}
+        </p>
       </CardContent>
     </Card>
   );

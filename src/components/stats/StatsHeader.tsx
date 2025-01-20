@@ -1,37 +1,32 @@
+import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+
 interface StatsHeaderProps {
   firstTransactionDate: Date | null;
   lastTransactionDate: Date | null;
   isLoading?: boolean;
 }
 
-export const StatsHeader = ({ 
-  firstTransactionDate, 
-  lastTransactionDate,
-  isLoading = false 
-}: StatsHeaderProps) => {
+export const StatsHeader = ({ firstTransactionDate, lastTransactionDate, isLoading = false }: StatsHeaderProps) => {
   if (isLoading) {
     return (
-      <div className="space-y-1">
-        <h2 className="text-2xl font-semibold tracking-tight">Loading statistics...</h2>
-        <p className="text-sm text-muted-foreground">Please wait while we fetch your transaction data</p>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-4 w-96" />
       </div>
     );
   }
 
   if (!firstTransactionDate || !lastTransactionDate) {
-    return (
-      <div className="space-y-1">
-        <h2 className="text-2xl font-semibold tracking-tight">No transactions found</h2>
-        <p className="text-sm text-muted-foreground">Upload some transactions to see your statistics</p>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="space-y-1">
-      <h2 className="text-2xl font-semibold tracking-tight">Transaction Statistics</h2>
-      <p className="text-sm text-muted-foreground">
-        Showing data from {firstTransactionDate.toLocaleDateString()} to {lastTransactionDate.toLocaleDateString()}
+    <div className="space-y-2">
+      <h2 className="text-2xl font-bold tracking-tight">Statistics</h2>
+      <p className="text-muted-foreground">
+        Showing data from {format(firstTransactionDate, 'PPP')} to{' '}
+        {format(lastTransactionDate, 'PPP')}
       </p>
     </div>
   );
