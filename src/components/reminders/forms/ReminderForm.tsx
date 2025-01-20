@@ -9,23 +9,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export interface ReminderFormData {
+interface ReminderFormData {
   name: string;
   amount: number;
   due_day: number;
   reminder_days_before: number[];
-  notification_types: ("whatsapp" | "email" | "in_app")[];
-  recurrence_frequency: 'none' | 'monthly';
+  notification_types: string[];
+  recurrence_frequency: 'none' | 'monthly' | 'yearly';
 }
 
 interface ReminderFormProps {
-  defaultValues: ReminderFormData;
+  defaultValues: Partial<ReminderFormData>;
   isSubmitting: boolean;
-  onSubmit: (data: ReminderFormData & { due_date: Date }) => void;
+  onSubmit: (data: any) => void; // Using any temporarily to match parent component
   onCancel: () => void;
 }
+
+const recurrenceOptions = [
+  { value: 'none', label: 'No recurrence' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+];
 
 export function ReminderForm({ 
   defaultValues, 
@@ -34,10 +46,19 @@ export function ReminderForm({
   onCancel 
 }: ReminderFormProps) {
   const form = useForm<ReminderFormData>({
-    defaultValues,
+    defaultValues: {
+      name: '',
+      amount: 0,
+      due_day: 1,
+      reminder_days_before: [7],
+      notification_types: ['email'],
+      recurrence_frequency: 'none',
+      ...defaultValues,
+    },
   });
 
   const handleSubmit = (data: ReminderFormData) => {
+    // Convert the due_day to a full date for the API
     const today = new Date();
     const dueDate = new Date(today.getFullYear(), today.getMonth(), data.due_day);
     
@@ -93,7 +114,7 @@ export function ReminderForm({
           name="due_day"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Due Day of Month (1-31)</FormLabel>
+              <FormLabel>Due Day of Month</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
@@ -106,6 +127,7 @@ export function ReminderForm({
                       field.onChange(value);
                     }
                   }}
+                  placeholder="Day of month (1-31)" 
                 />
               </FormControl>
               <FormMessage />
@@ -117,21 +139,23 @@ export function ReminderForm({
           control={form.control}
           name="recurrence_frequency"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Monthly Recurring</FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Automatically create this reminder every month
-                </div>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value === 'monthly'}
-                  onCheckedChange={(checked) => 
-                    field.onChange(checked ? 'monthly' : 'none')
-                  }
-                />
-              </FormControl>
+            <FormItem>
+              <FormLabel>Recurrence</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recurrence" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {recurrenceOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
             </FormItem>
           )}
         />
