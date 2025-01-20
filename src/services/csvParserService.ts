@@ -15,39 +15,15 @@ const headerMap: { [key: string]: string } = {
   'Balance': 'balance'
 };
 
-// Rent transaction identification configuration
-const RENT_KEYWORDS = ['trading places', 'rent'];
-const RENT_AMOUNT = 2200;
-const ADJUSTED_RENT_AMOUNT = 1000;
-
-const isRentTransaction = (transaction: Transaction): boolean => {
-  const description = transaction.description?.toLowerCase() || '';
-
-  // Check if the description contains "trading places" (case-insensitive)
-  const hasTradingPlaces = description.includes('trading places');
-
-  // Check if the amount is -2200 (no need for Math.abs)
-  const isCorrectAmount = transaction.amount === -RENT_AMOUNT;
-
-  // Log the individual checks for debugging
-  console.log('Rent transaction check:', {
-    description,
-    hasTradingPlaces,
-    amount: transaction.amount,
-    isCorrectAmount,
-  });
-
-  // Return true only if both conditions are met
-  return hasTradingPlaces && isCorrectAmount;
-};
-
 const adjustRentTransaction = (transaction: Transaction): Transaction => {
-  if (isRentTransaction(transaction)) {
-    console.log('Adjusting rent transaction amount from', transaction.amount, 'to', -ADJUSTED_RENT_AMOUNT);
+  if (
+    transaction.description?.toLowerCase().includes('rent') &&
+    transaction.amount === 2200
+  ) {
     return {
       ...transaction,
-      amount: -ADJUSTED_RENT_AMOUNT, // Keep negative sign for expenses
-      description: `${transaction.description} ⚡ (adjusted)`, // Adding indicators
+      amount: 1000,
+      description: `${transaction.description} ⚡`, // Adding indicator for adjusted transactions
     };
   }
   return transaction;
@@ -79,8 +55,7 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
       complete: (results) => {
         const transactions = (results.data as Transaction[])
           .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
-          .map(adjustRentTransaction);
-        console.log('Filtered completed transactions count:', transactions.length);
+          .map(adjustRentTransaction); // Apply rent adjustment to each transaction
         resolve(transactions);
       },
       error: (error) => {
