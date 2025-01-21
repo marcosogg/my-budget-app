@@ -12,7 +12,7 @@ export const formatDate = (dateStr: string | null): string => {
   }
 };
 
-// Currency formatting
+// Currency formatting with currency parameter
 export const formatAmount = (amount: number, currency: string = 'EUR'): string => {
   return new Intl.NumberFormat('en-IE', {
     style: 'currency',
@@ -25,6 +25,11 @@ export const getTransactionColor = (amount: number): string => {
   if (amount > 0) return 'text-transaction-income';
   if (amount < 0) return 'text-transaction-expense';
   return 'text-transaction-neutral';
+};
+
+// Icon color helper
+export const getTransactionIconColor = (amount: number): string => {
+  return amount > 0 ? 'text-transaction-income' : 'text-transaction-expense';
 };
 
 // Count formatting

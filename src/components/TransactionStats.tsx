@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTransactionStats } from './stats/useTransactionStats';
 import { StatsHeader } from './stats/StatsHeader';
 import { StatCard } from './stats/StatCard';
+import { formatAmount, formatTransactionCount } from '@/utils/formatters';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
@@ -12,6 +13,16 @@ interface TransactionStatsProps {
   isLoading?: boolean;
 }
 
+/**
+ * TransactionStats Component
+ * 
+ * Displays statistical information about transactions including:
+ * - Card payments
+ * - Savings
+ * - Credit card repayments
+ * 
+ * Provides interactive elements to filter transactions by type.
+ */
 const TransactionStats = ({ 
   transactions, 
   categories = [], 
