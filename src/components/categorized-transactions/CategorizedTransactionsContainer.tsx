@@ -18,8 +18,7 @@ const CategorizedTransactionsContainer = () => {
   const { 
     filters, 
     filteredTransactions, 
-    handleFilterChange, 
-    handleExpensesOnlyChange 
+    handleFilterChange
   } = useTransactionFilters(categorizedTransactions);
   const { sortOption, setSortOption, sortedTransactions } = useTransactionSort(filteredTransactions);
 
@@ -60,7 +59,6 @@ const CategorizedTransactionsContainer = () => {
       onUpdateCategory={handleUpdateCategory}
       filters={filters}
       onFilterChange={handleFilterChange}
-      onExpensesOnlyChange={handleExpensesOnlyChange}
       sortOption={sortOption}
       onSortChange={setSortOption}
       isLoading={isUpdating}
