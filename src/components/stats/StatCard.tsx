@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LucideIcon } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatAmount, formatTransactionCount } from '@/utils/formatters';
 
 interface StatCardProps {
   title: string;
@@ -30,42 +30,38 @@ export const StatCard = ({
 }: StatCardProps) => {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-7 w-28 mb-1" />
-          <Skeleton className="h-4 w-16" />
-        </CardContent>
+      <Card className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-[120px]" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-[150px]" />
+          <Skeleton className="h-4 w-[100px]" />
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card
-      className={cn(
-        "hover:shadow-md transition-shadow cursor-pointer",
-        onClick && "hover:cursor-pointer"
-      )}
+    <Card 
+      className={`p-6 space-y-4 cursor-pointer transition-colors hover:bg-${gradientFrom}`}
       onClick={onClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={cn("h-4 w-4", iconColor)} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">
-          {new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-          }).format(amount)}
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">{title}</h3>
+        <div className={`p-2 rounded-full bg-${gradientFrom}`}>
+          <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
-        <p className="text-xs text-muted-foreground">
-          {count} transaction{count !== 1 ? 's' : ''}
+      </div>
+      <div className="space-y-2">
+        <p className="text-2xl font-bold">
+          {formatAmount(amount)}
         </p>
-      </CardContent>
+        <div className={`inline-flex items-center text-sm text-${badgeColor}`}>
+          {formatTransactionCount(count)}
+        </div>
+      </div>
     </Card>
   );
 };
