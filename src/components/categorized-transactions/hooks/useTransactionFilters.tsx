@@ -1,8 +1,19 @@
 import { useState, useMemo } from 'react';
-import { CategorizedTransactionData, TransactionFilters, isExpenseTransaction } from '@/shared/types/transactions';
+import { CategorizedTransaction, Category } from '@/types/categorization';
+import { Transaction } from '@/types/transaction';
 
-export const useTransactionFilters = (transactions: CategorizedTransactionData[]) => {
-  const [filters, setFilters] = useState<TransactionFilters>({
+type FilterState = {
+  category: string;
+  description: string;
+  date: Date | undefined;
+  expensesOnly: boolean;
+};
+
+export const useTransactionFilters = (transactions: (CategorizedTransaction & { 
+  transactions: Transaction, 
+  categories: Category 
+})[]) => {
+  const [filters, setFilters] = useState<FilterState>({
     category: "",
     description: "",
     date: undefined,
@@ -12,19 +23,22 @@ export const useTransactionFilters = (transactions: CategorizedTransactionData[]
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
 
+    // Apply expenses-only filter first
     if (filters.expensesOnly) {
-      filtered = filtered.filter(isExpenseTransaction);
+      filtered = filtered.filter(transaction =>
+        transaction.transactions.amount < 0
+      );
     }
 
     if (filters.category) {
       filtered = filtered.filter(transaction =>
-        transaction.categories.name.toLowerCase().includes(filters.category?.toLowerCase() || '')
+        transaction.categories.name.toLowerCase().includes(filters.category.toLowerCase())
       );
     }
 
     if (filters.description) {
       filtered = filtered.filter(transaction =>
-        transaction.transactions.description?.toLowerCase().includes(filters.description?.toLowerCase() || '')
+        transaction.transactions.description?.toLowerCase().includes(filters.description.toLowerCase())
       );
     }
 
@@ -42,7 +56,7 @@ export const useTransactionFilters = (transactions: CategorizedTransactionData[]
     return filtered;
   }, [transactions, filters]);
 
-  const handleFilterChange = (type: keyof TransactionFilters, value: string | Date | undefined) => {
+  const handleFilterChange = (type: keyof FilterState, value: string | Date | undefined) => {
     setFilters(prev => ({
       ...prev,
       [type]: value,
