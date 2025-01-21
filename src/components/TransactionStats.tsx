@@ -26,24 +26,29 @@ const TransactionStats = ({
   );
 
   const handleCountClick = (filterType: string, filterValue?: string) => {
-    navigate('/transactions', {
-      state: { from: location.pathname }
-    });
+    const params = new URLSearchParams();
     
     switch (filterType) {
       case 'CARD_PAYMENT':
-        setFilter('type', filterType);
+        params.set('type', filterType);
         break;
       case 'product':
-        setFilter('product', filterValue);
+        if (filterValue) params.set('product', filterValue);
         break;
       case 'TRANSFER':
-        setFilter('type', filterType);
+        params.set('type', filterType);
         if (filterValue) {
-          setFilter('description', filterValue);
+          params.set('description', filterValue);
         }
         break;
     }
+    
+    navigate({
+      pathname: '/transactions',
+      search: params.toString()
+    }, {
+      state: { from: location.pathname }
+    });
   };
 
   return (
