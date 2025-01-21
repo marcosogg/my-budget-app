@@ -8,13 +8,13 @@ import { useTransactionFilters } from '@/hooks/useTransactionFilters';
 import { StatCardsGrid } from './stats/StatCardsGrid';
 
 interface TransactionStatsProps {
-  transactions: Transaction[];
+  transactions?: Transaction[];
   categories?: Category[];
   isLoading?: boolean;
 }
 
-const TransactionStats = ({ 
-  transactions, 
+export const TransactionStats = ({ 
+  transactions = [], 
   categories = [], 
   isLoading = false 
 }: TransactionStatsProps) => {
@@ -67,5 +67,3 @@ const TransactionStats = ({
     </div>
   );
 };
-
-export default TransactionStats;

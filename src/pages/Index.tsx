@@ -23,7 +23,7 @@ const Index = () => {
   // Prepare data for the spending chart
   const spendingByCategory = categories?.map((category) => {
     const categoryTransactions = transactions?.filter(
-      (t) => t.category_id === category.id && t.amount < 0
+      (t) => t.amount < 0
     ) || [];
     const amount = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     return {
@@ -61,7 +61,11 @@ const Index = () => {
     <div className="container mx-auto py-10 space-y-8">
       <DashboardHeader />
       
-      <TransactionStats />
+      <TransactionStats 
+        transactions={transactions} 
+        categories={categories}
+        isLoading={isLoadingTransactions || isLoadingCategories} 
+      />
 
       <Card className="bg-primary">
         <CardHeader>
