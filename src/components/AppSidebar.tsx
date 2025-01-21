@@ -3,9 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SettingsDropdown } from "@/components/SettingsDropdown";
+import { useAuth } from "@/App";
 
 export function AppSidebar() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const isRouteActive = (path: string) => {
     if (path === '/') {
@@ -65,6 +67,7 @@ export function AppSidebar() {
         </Button>
 
         <div className="flex items-center px-2">
+          <span className="text-sm text-muted-foreground mr-2">Settings</span>
           <SettingsDropdown />
         </div>
 
