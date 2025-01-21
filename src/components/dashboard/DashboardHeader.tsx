@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Upload, ExternalLink, LogOut } from 'lucide-react';
+import { ExternalLink, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,10 +18,6 @@ export const DashboardHeader = () => {
         <p className="text-gray-600">View your transaction statistics</p>
       </div>
       <div className="flex gap-4">
-        <Button variant="outline" onClick={() => navigate('/upload')}>
-          <Upload className="mr-2 h-4 w-4" />
-          Upload CSV
-        </Button>
         <Button variant="outline" onClick={() => navigate('/transactions')}>
           View All Transactions
           <ExternalLink className="ml-2 h-4 w-4" />
