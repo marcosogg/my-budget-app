@@ -7,9 +7,18 @@ import {
 } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SettingsDropdown } from "@/components/SettingsDropdown";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function AppSidebar() {
+  const location = useLocation();
+
+  const isRouteActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -18,27 +27,27 @@ export function AppSidebar() {
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/')}>
               <Link to="/" className="flex items-center gap-2">Dashboard</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/transactions')}>
               <Link to="/transactions" className="flex items-center gap-2">Transactions</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/upload')}>
               <Link to="/upload" className="flex items-center gap-2">Upload</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/analytics/categories')}>
               <Link to="/analytics/categories" className="flex items-center gap-2">Categories</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/reminders')}>
               <Link to="/reminders" className="flex items-center gap-2">Reminders</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -50,7 +59,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isRouteActive('/login')}>
               <Link to="/login" className="flex items-center gap-2">Login</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
