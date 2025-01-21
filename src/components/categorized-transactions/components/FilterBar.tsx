@@ -1,14 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { Category } from '@/types/categorization';
 import { SortOption } from '../hooks/useTransactionSort';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { SortSelect } from './filters/SortSelect';
+import { CategorySelect } from './filters/CategorySelect';
+import { DescriptionInput } from './filters/DescriptionInput';
+import { DateFilter } from './filters/DateFilter';
+import { ExpensesToggle } from './filters/ExpensesToggle';
 
 interface FilterBarProps {
   categories: Category[];
@@ -30,76 +26,30 @@ export const FilterBar = ({
   filters,
   onExpensesOnlyChange
 }: FilterBarProps) => {
-  const filteredCategories = categories.filter(category => category.type !== 'uncategorized');
-
   return (
     <div className="flex flex-wrap gap-4">
-      <Select onValueChange={(value: SortOption) => onSortChange(value)}>
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="date-asc">Date (Ascending)</SelectItem>
-          <SelectItem value="date-desc">Date (Descending)</SelectItem>
-          <SelectItem value="amount-asc">Amount (Ascending)</SelectItem>
-          <SelectItem value="amount-desc">Amount (Descending)</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select 
+      <SortSelect onSortChange={onSortChange} />
+      
+      <CategorySelect
+        categories={categories}
         value={filters.category}
-        onValueChange={(value) => onFilterChange('category', value)}
-      >
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Filter by Category" />
-        </SelectTrigger>
-        <SelectContent>
-          {filteredCategories.map((category) => (
-            <SelectItem key={category.id} value={category.name}>
-              {category.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Input
-        type="text"
-        placeholder="Filter by Description"
-        value={filters.description}
-        onChange={(e) => onFilterChange('description', e.target.value)}
-        className="w-[200px]"
+        onFilterChange={onFilterChange}
       />
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-[200px] justify-start text-left font-normal",
-              !filters.date && "text-muted-foreground"
-            )}
-          >
-            {filters.date ? format(filters.date, "dd/MM/yyyy") : "Filter by Date"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={filters.date}
-            onSelect={(date) => onFilterChange('date', date)}
-            className="border-0"
-          />
-        </PopoverContent>
-      </Popover>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="expenses-only"
-          checked={filters.expensesOnly}
-          onCheckedChange={onExpensesOnlyChange}
-        />
-        <Label htmlFor="expenses-only">Show Expenses Only</Label>
-      </div>
+      
+      <DescriptionInput
+        value={filters.description}
+        onFilterChange={onFilterChange}
+      />
+      
+      <DateFilter
+        date={filters.date}
+        onFilterChange={onFilterChange}
+      />
+      
+      <ExpensesToggle
+        checked={filters.expensesOnly}
+        onExpensesOnlyChange={onExpensesOnlyChange}
+      />
     </div>
   );
 };
