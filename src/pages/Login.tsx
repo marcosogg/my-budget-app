@@ -6,32 +6,57 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthError } from "@supabase/supabase-js";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>("");
+  const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Check current session on mount
+    const checkSession = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session check error:", sessionError);
+        // Clear any existing session data to prevent 403 errors
+        await supabase.auth.signOut();
+      } else if (session) {
+        navigate("/");
+      }
+    };
+    
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
+      
       if (event === 'SIGNED_IN' && session) {
         navigate("/");
       }
-      if (event === 'USER_UPDATED') {
-        const handleError = async () => {
-          const { error } = await supabase.auth.getSession();
-          if (error) {
-            setError(getErrorMessage(error));
-          }
-        };
-        handleError();
-      }
+      
       if (event === 'SIGNED_OUT') {
         setError(""); // Clear errors on sign out
+        // Ensure we clear any lingering session data
+        await supabase.auth.signOut();
+        toast({
+          title: "Signed out successfully",
+          description: "You have been logged out of your account.",
+        });
+      }
+      
+      if (event === 'USER_UPDATED') {
+        const { error } = await supabase.auth.getSession();
+        if (error) {
+          setError(getErrorMessage(error));
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   const getErrorMessage = (error: AuthError) => {
     switch (error.message) {
@@ -39,6 +64,8 @@ const Login = () => {
         return "Invalid email or password. Please check your credentials and try again.";
       case "Email not confirmed":
         return "Please verify your email address before signing in.";
+      case "session_not_found":
+        return "Your session has expired. Please sign in again.";
       default:
         return error.message;
     }
