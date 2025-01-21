@@ -3,7 +3,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { useTransactionsData } from '@/hooks/useTransactionsData';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { FileUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -16,24 +16,25 @@ const Index = () => {
   const { data: transactions = [] } = useTransactionsData();
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4 space-y-8">
+    <div className="flex-1 min-h-screen">
       <DashboardHeader />
-
-      {transactions.length > 0 ? (
-        <TransactionStats 
-          transactions={transactions} 
-          categories={categories}
-          isLoading={categoriesLoading}
-        />
-      ) : (
-        <div className="text-center py-12 space-y-4">
-          <p className="text-muted-foreground">No transactions found</p>
-          <Button onClick={() => navigate('/upload')}>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Transactions
-          </Button>
-        </div>
-      )}
+      <main className="p-6">
+        {transactions.length > 0 ? (
+          <TransactionStats 
+            transactions={transactions} 
+            categories={categories}
+            isLoading={categoriesLoading}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <p className="text-muted-foreground">No transactions found</p>
+            <Button onClick={() => navigate('/upload')} variant="default" className="flex items-center gap-2">
+              <FileUp className="h-4 w-4" />
+              Upload Transactions
+            </Button>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
