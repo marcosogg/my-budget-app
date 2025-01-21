@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { CategorizedTransactionData, TransactionFilters, isExpenseTransaction } from '@/shared/types/transactions';
+import { CategorizedTransactionData, TransactionFilters, isExpenseTransaction } from '@/shared/types/transactions.d.ts';
 
 export const useTransactionFilters = (transactions: CategorizedTransactionData[]) => {
   const [filters, setFilters] = useState<TransactionFilters>({
