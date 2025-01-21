@@ -33,7 +33,6 @@ export function MappingTable({
 }: MappingTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{ description: string; category_id: string } | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
@@ -92,7 +91,7 @@ export function MappingTable({
               mapping={mapping}
               editValues={editValues}
               categories={categories || []}
-              isSaving={isSaving}
+              isSaving={false}
               inputRef={inputRef}
               onCancel={handleCancelEdit}
               onEditValuesChange={setEditValues}
