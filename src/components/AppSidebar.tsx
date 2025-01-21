@@ -1,13 +1,8 @@
-import { 
-  Sidebar, 
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton
-} from "@/components/ui/sidebar";
+import { Home, RefreshCcw, FileUp, Bell } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { SettingsDropdown } from "@/components/SettingsDropdown";
-import { Link, useLocation } from "react-router-dom";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -20,51 +15,80 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <div className="flex items-center justify-end p-4">
-          <NotificationBell />
+    <div className="w-64 min-h-screen border-r bg-background p-4">
+      <div className="flex items-center justify-end mb-6">
+        <NotificationBell />
+      </div>
+      <nav className="space-y-2">
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/">
+            <Home className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
+        </Button>
+
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/transactions') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/transactions">
+            <RefreshCcw className="mr-2 h-4 w-4" />
+            Transactions
+          </Link>
+        </Button>
+
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/upload') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/upload">
+            <FileUp className="mr-2 h-4 w-4" />
+            Upload
+          </Link>
+        </Button>
+
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/analytics/categories') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/analytics/categories">
+            <Bell className="mr-2 h-4 w-4" />
+            Categories
+          </Link>
+        </Button>
+
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/reminders') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/reminders">
+            <Bell className="mr-2 h-4 w-4" />
+            Reminders
+          </Link>
+        </Button>
+
+        <div className="flex items-center px-2">
+          <SettingsDropdown />
         </div>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/')}>
-              <Link to="/" className="flex items-center gap-2">Dashboard</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/transactions')}>
-              <Link to="/transactions" className="flex items-center gap-2">Transactions</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/upload')}>
-              <Link to="/upload" className="flex items-center gap-2">Upload</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/analytics/categories')}>
-              <Link to="/analytics/categories" className="flex items-center gap-2">Categories</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/reminders')}>
-              <Link to="/reminders" className="flex items-center gap-2">Reminders</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <div className="flex items-center gap-2">
-                <SettingsDropdown />
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isRouteActive('/login')}>
-              <Link to="/login" className="flex items-center gap-2">Login</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-    </Sidebar>
+
+        <Button
+          variant="ghost"
+          asChild
+          className={`w-full justify-start ${isRouteActive('/login') ? 'bg-accent' : ''}`}
+        >
+          <Link to="/login">
+            Login
+          </Link>
+        </Button>
+      </nav>
+    </div>
   );
 }
