@@ -1,4 +1,4 @@
-import { Home, RefreshCcw, FileUp, Bell } from "lucide-react";
+import { Home, RefreshCcw, Bell } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -39,17 +39,6 @@ export function AppSidebar() {
           <Link to="/transactions">
             <RefreshCcw className="mr-2 h-4 w-4" />
             Transactions
-          </Link>
-        </Button>
-
-        <Button
-          variant="ghost"
-          asChild
-          className={`w-full justify-start ${isRouteActive('/upload') ? 'bg-accent' : ''}`}
-        >
-          <Link to="/upload">
-            <FileUp className="mr-2 h-4 w-4" />
-            Upload
           </Link>
         </Button>
 
