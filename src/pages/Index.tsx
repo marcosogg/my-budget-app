@@ -22,9 +22,14 @@ const Index = () => {
 
   // Prepare data for the spending chart
   const spendingByCategory = categories?.map((category) => {
-    const categoryTransactions = transactions?.filter(
-      (t) => t.amount < 0
-    ) || [];
+    // Get categorized transactions for this category from the categorized_transactions table
+    const categoryTransactions = transactions?.filter((t) => {
+      const categorizedTransaction = t.categorized_transactions?.find(
+        ct => ct.category_id === category.id
+      );
+      return categorizedTransaction && t.amount < 0;
+    }) || [];
+
     const amount = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     return {
       name: category.name,
