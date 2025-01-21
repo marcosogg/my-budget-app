@@ -54,8 +54,13 @@ export const parseCSV = (text: string): Promise<Transaction[]> => {
       },
       complete: (results) => {
         const transactions = (results.data as Transaction[])
-          .filter(t => t.state === 'COMPLETED' && t.completed_date && t.started_date)
-          .map(adjustRentTransaction); // Apply rent adjustment to each transaction
+          .filter(t => 
+            t.state === 'COMPLETED' && 
+            t.completed_date && 
+            t.started_date &&
+            t.amount < 0 // Only include negative transactions
+          )
+          .map(adjustRentTransaction);
         resolve(transactions);
       },
       error: (error) => {

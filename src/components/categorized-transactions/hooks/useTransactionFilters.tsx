@@ -6,7 +6,6 @@ type FilterState = {
   category: string;
   description: string;
   date: Date | undefined;
-  expensesOnly: boolean;
 };
 
 export const useTransactionFilters = (transactions: (CategorizedTransaction & { 
@@ -17,18 +16,10 @@ export const useTransactionFilters = (transactions: (CategorizedTransaction & {
     category: "",
     description: "",
     date: undefined,
-    expensesOnly: false,
   });
 
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
-
-    // Apply expenses-only filter first
-    if (filters.expensesOnly) {
-      filtered = filtered.filter(transaction =>
-        transaction.transactions.amount < 0
-      );
-    }
 
     if (filters.category) {
       filtered = filtered.filter(transaction =>
@@ -63,17 +54,9 @@ export const useTransactionFilters = (transactions: (CategorizedTransaction & {
     }));
   };
 
-  const handleExpensesOnlyChange = (checked: boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      expensesOnly: checked,
-    }));
-  };
-
   return {
     filters,
     filteredTransactions,
     handleFilterChange,
-    handleExpensesOnlyChange,
   };
 };

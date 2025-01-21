@@ -21,10 +21,8 @@ interface CategorizedTransactionTableProps {
     category: string;
     description: string;
     date: Date | undefined;
-    expensesOnly: boolean;
   };
   onFilterChange: (type: string, value: string | Date | undefined) => void;
-  onExpensesOnlyChange: (checked: boolean) => void;
   sortOption: SortOption;
   onSortChange: (value: SortOption) => void;
   isLoading: boolean;
@@ -38,7 +36,6 @@ const CategorizedTransactionTable = ({
   onUpdateCategory,
   filters,
   onFilterChange,
-  onExpensesOnlyChange,
   sortOption,
   onSortChange,
   isLoading,
@@ -54,7 +51,6 @@ const CategorizedTransactionTable = ({
         onFilterChange={onFilterChange}
         onSortChange={onSortChange}
         filters={filters}
-        onExpensesOnlyChange={onExpensesOnlyChange}
       />
       
       <div className="rounded-md border">
