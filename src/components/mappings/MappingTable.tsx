@@ -1,68 +1,25 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { useRef, useEffect, useState } from "react";
-import { useCategories } from "@/hooks/useCategories";
-import { useToast } from "@/hooks/use-toast";
 import { TableHeader } from "./table/TableHeader";
 import { LoadingState } from "./table/LoadingState";
-import { EditableRow } from "./table/EditableRow";
-import { StaticRow } from "./table/StaticRow";
 
 interface Mapping {
   id: string;
   description: string;
-  category_id: string;
   category_name: string;
   transaction_count: number;
-  last_used_date: string | null;
 }
 
 interface MappingTableProps {
   mappings: Mapping[];
   isLoading?: boolean;
   error?: Error | null;
-  onEdit: (mapping: Mapping) => void;
-  onDelete: (mappingId: string) => void;
 }
 
 export function MappingTable({ 
   mappings, 
   isLoading, 
-  error,
-  onEdit, 
-  onDelete 
+  error
 }: MappingTableProps) {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ description: string; category_id: string } | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  
-  const { data: categories } = useCategories({ onlyExpenses: true });
-
-  useEffect(() => {
-    if (editingId && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [editingId]);
-
-  const handleStartEdit = (mapping: Mapping) => {
-    setEditingId(mapping.id);
-    setEditValues({
-      description: mapping.description,
-      category_id: mapping.category_id,
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditValues(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, mapping: Mapping) => {
-    if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
-  };
-
   if (error) {
     return (
       <div className="text-center p-4 text-red-500">
@@ -85,31 +42,18 @@ export function MappingTable({
       <TableHeader />
       <TableBody>
         {mappings?.map((mapping) => (
-          editingId === mapping.id && editValues ? (
-            <EditableRow
-              key={mapping.id}
-              mapping={mapping}
-              editValues={editValues}
-              categories={categories || []}
-              isSaving={false}
-              inputRef={inputRef}
-              onCancel={handleCancelEdit}
-              onEditValuesChange={setEditValues}
-              onKeyDown={(e) => handleKeyDown(e, mapping)}
-            />
-          ) : (
-            <StaticRow
-              key={mapping.id}
-              mapping={mapping}
-              isEditingAny={!!editingId}
-              onEdit={() => handleStartEdit(mapping)}
-              onDelete={() => onDelete(mapping.id)}
-            />
-          )
+          <TableRow key={mapping.id}>
+            <TableCell className="font-medium">
+              {mapping.description}
+            </TableCell>
+            <TableCell>
+              {mapping.category_name}
+            </TableCell>
+          </TableRow>
         ))}
         {mappings.length === 0 && (
           <TableRow>
-            <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+            <TableCell colSpan={2} className="text-center py-6 text-muted-foreground">
               No mappings found
             </TableCell>
           </TableRow>
