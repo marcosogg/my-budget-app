@@ -1,10 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
-
-interface TransactionFilters {
-  type?: string;
-  product?: string;
-  description?: string;
-}
+import { TransactionFilters } from '@/shared/types/transactions';
 
 export const useTransactionFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
