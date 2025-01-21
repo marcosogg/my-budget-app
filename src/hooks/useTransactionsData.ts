@@ -11,7 +11,7 @@ export const useTransactionsData = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select('*, categorized_transactions(*)')
         .order('completed_date', { ascending: false });
 
       if (error) {
@@ -23,21 +23,7 @@ export const useTransactionsData = () => {
         throw error;
       }
 
-      return data.map(transaction => ({
-        type: transaction.type,
-        product: transaction.product,
-        started_date: transaction.started_date,
-        completed_date: transaction.completed_date,
-        description: transaction.description,
-        amount: transaction.amount,
-        fee: transaction.fee,
-        currency: transaction.currency,
-        state: transaction.state,
-        balance: transaction.balance,
-        id: transaction.id,
-        user_id: transaction.user_id,
-        created_at: transaction.created_at,
-      })) as Transaction[];
+      return data as Transaction[];
     },
   });
 };
