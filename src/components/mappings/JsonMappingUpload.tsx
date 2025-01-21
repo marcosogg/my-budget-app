@@ -24,7 +24,6 @@ export function JsonMappingUpload() {
       const text = await file.text();
       const mappings = JSON.parse(text);
 
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error('Please sign in to upload mappings');
@@ -32,19 +31,12 @@ export function JsonMappingUpload() {
       }
 
       const { successCount, skipCount } = await uploadMappings(mappings, user.id);
-
-      // Refresh mappings list
       queryClient.invalidateQueries({ queryKey: ["description-mappings"] });
-
-      toast.success(
-        `Upload complete: ${successCount} mappings created, ${skipCount} skipped`
-      );
+      toast.success(`${successCount} mappings imported, ${skipCount} skipped`);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to process JSON file');
+      toast.error('Failed to import mappings');
     } finally {
       setIsUploading(false);
-      // Reset file input
       event.target.value = '';
     }
   };

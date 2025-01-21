@@ -2,12 +2,11 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { TableHeader } from "./table/TableHeader";
 import { LoadingState } from "./table/LoadingState";
 
-interface Mapping {
+type Mapping = {
   id: string;
   description: string;
   category_name: string;
-  transaction_count: number;
-}
+};
 
 interface MappingTableProps {
   mappings: Mapping[];
@@ -15,15 +14,11 @@ interface MappingTableProps {
   error?: Error | null;
 }
 
-export function MappingTable({ 
-  mappings, 
-  isLoading, 
-  error
-}: MappingTableProps) {
+export function MappingTable({ mappings, isLoading, error }: MappingTableProps) {
   if (error) {
     return (
-      <div className="text-center p-4 text-red-500">
-        Error loading mappings: {error.message}
+      <div className="text-center p-4 text-destructive">
+        Failed to load mappings
       </div>
     );
   }
