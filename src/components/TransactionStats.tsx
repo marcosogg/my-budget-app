@@ -26,7 +26,9 @@ const TransactionStats = ({
   );
 
   const handleCountClick = (filterType: string, filterValue?: string) => {
-    navigate('/transactions');
+    navigate('/transactions', {
+      state: { from: location.pathname }
+    });
     
     switch (filterType) {
       case 'CARD_PAYMENT':
@@ -45,7 +47,7 @@ const TransactionStats = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <StatsHeader 
         firstTransactionDate={firstTransactionDate}
         lastTransactionDate={lastTransactionDate}

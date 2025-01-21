@@ -30,7 +30,7 @@ export const StatCard = ({
 }: StatCardProps) => {
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4 animate-pulse">
         <Skeleton className="h-8 w-[200px]" />
         <Skeleton className="h-10 w-[150px]" />
         <Skeleton className="h-6 w-[100px]" />
@@ -42,7 +42,7 @@ export const StatCard = ({
     <div
       onClick={onClick}
       className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4",
+        "rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4 animate-fade-in",
         onClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
     >
