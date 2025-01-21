@@ -68,15 +68,17 @@ export function AppSidebar() {
           <SettingsDropdown />
         </div>
 
-        <Button
-          variant="ghost"
-          asChild
-          className={`w-full justify-start ${isRouteActive('/login') ? 'bg-accent' : ''}`}
-        >
-          <Link to="/login">
-            Login
-          </Link>
-        </Button>
+        {!isAuthenticated && (
+          <Button
+            variant="ghost"
+            asChild
+            className={`w-full justify-start ${isRouteActive('/login') ? 'bg-accent' : ''}`}
+          >
+            <Link to="/login">
+              Login
+            </Link>
+          </Button>
+        )}
       </nav>
     </div>
   );
