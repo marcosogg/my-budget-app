@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTransactionStats } from './stats/useTransactionStats';
 import { StatsHeader } from './stats/StatsHeader';
 import { StatCard } from './stats/StatCard';
+import { useTransactionFilters } from '@/hooks/useTransactionFilters';
 
 interface TransactionStatsProps {
   transactions: Transaction[];
@@ -18,28 +19,29 @@ const TransactionStats = ({
   isLoading = false 
 }: TransactionStatsProps) => {
   const navigate = useNavigate();
+  const { setFilter } = useTransactionFilters();
   const { stats, firstTransactionDate, lastTransactionDate } = useTransactionStats(
     transactions, 
     categories
   );
 
   const handleCountClick = (filterType: string, filterValue?: string) => {
-    const queryParams = new URLSearchParams();
+    navigate('/transactions');
     
     switch (filterType) {
       case 'CARD_PAYMENT':
-        queryParams.set('type', filterType);
+        setFilter('type', filterType);
         break;
       case 'product':
-        queryParams.set('product', filterValue || '');
+        setFilter('product', filterValue);
         break;
       case 'TRANSFER':
-        queryParams.set('type', filterType);
-        queryParams.set('description', filterValue || '');
+        setFilter('type', filterType);
+        if (filterValue) {
+          setFilter('description', filterValue);
+        }
         break;
     }
-    
-    navigate(`/transactions?${queryParams.toString()}`);
   };
 
   return (
