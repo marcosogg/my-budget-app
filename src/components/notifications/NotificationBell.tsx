@@ -8,8 +8,16 @@ import {
 } from '@/components/ui/popover';
 import { NotificationList } from './NotificationList';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@/App';
 
 export function NotificationBell() {
+  const { isAuthenticated } = useAuth();
+  
+  // Return null if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const { unreadCount } = useNotifications();
 
   return (
