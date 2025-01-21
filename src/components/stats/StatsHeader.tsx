@@ -1,36 +1,35 @@
-import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from 'react-router-dom';
+import { StatsCard } from "./StatsCard";
+import { StatsGrid } from "./StatsGrid";
+import { TransactionStats } from "@/types/transaction";
 
 interface StatsHeaderProps {
-  firstTransactionDate: Date | null;
-  lastTransactionDate: Date | null;
+  stats: TransactionStats;
   isLoading?: boolean;
 }
 
-export const StatsHeader = ({ 
-  firstTransactionDate, 
-  lastTransactionDate,
-  isLoading = false 
+const StatsHeader = ({ 
+  stats,
+  isLoading = false
 }: StatsHeaderProps) => {
-  if (isLoading) {
-    return (
-      <div className="space-y-1">
-        <Skeleton className="h-7 w-[300px]" />
-        <Skeleton className="h-5 w-[200px]" />
-      </div>
-    );
-  }
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  if (!firstTransactionDate || !lastTransactionDate) {
-    return null;
-  }
+  const handleViewAll = () => {
+    navigate('/transactions', { 
+      state: { from: location.pathname }
+    });
+  };
 
   return (
-    <div className="space-y-1">
-      <h2 className="text-2xl font-bold tracking-tight">Transaction Overview</h2>
-      <p className="text-sm text-muted-foreground">
-        From {format(firstTransactionDate, 'MMMM d, yyyy')} to {format(lastTransactionDate, 'MMMM d, yyyy')}
-      </p>
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-2xl font-bold">Transaction Stats</h2>
+      <Button variant="outline" onClick={handleViewAll}>
+        View All
+      </Button>
     </div>
   );
 };
+
+export default StatsHeader;
