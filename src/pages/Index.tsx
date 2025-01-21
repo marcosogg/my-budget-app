@@ -16,7 +16,7 @@ const Index = () => {
   const { data: transactions = [] } = useTransactionsData();
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4 space-y-8">
+    <div className="container py-8 space-y-8">
       <DashboardHeader />
 
       {transactions.length > 0 ? (
@@ -26,8 +26,8 @@ const Index = () => {
           isLoading={categoriesLoading}
         />
       ) : (
-        <div className="text-center py-12 space-y-4">
-          <p className="text-muted-foreground">No transactions found</p>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">No transactions found</p>
           <Button onClick={() => navigate('/upload')}>
             <Upload className="mr-2 h-4 w-4" />
             Upload Transactions

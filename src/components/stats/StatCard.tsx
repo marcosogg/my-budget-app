@@ -30,7 +30,7 @@ export const StatCard = ({
 }: StatCardProps) => {
   if (isLoading) {
     return (
-      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4 animate-pulse">
         <Skeleton className="h-8 w-[200px]" />
         <Skeleton className="h-10 w-[150px]" />
         <Skeleton className="h-6 w-[100px]" />
@@ -42,29 +42,27 @@ export const StatCard = ({
     <div
       onClick={onClick}
       className={cn(
-        "rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4 hover:shadow-md transition-all",
-        onClick && "cursor-pointer"
+        "rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4 animate-fade-in",
+        onClick && "cursor-pointer hover:shadow-md transition-shadow"
       )}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "p-2 rounded-lg",
-            `bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`
-          )}>
-            <Icon className={cn("h-5 w-5", iconColor)} />
-          </div>
-          <h3 className="font-medium text-lg">{title}</h3>
+      <div className="flex items-center gap-2">
+        <div className={cn(
+          "p-2 rounded-full",
+          `bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`
+        )}>
+          <Icon className={cn("h-4 w-4", iconColor)} />
         </div>
+        <h3 className="font-medium">{title}</h3>
       </div>
       
-      <div className="text-3xl font-bold tracking-tight">
+      <div className="text-2xl font-bold">
         {formatAmount(Math.abs(amount))}
       </div>
 
       <div className={cn(
-        "text-sm font-medium",
-        `text-${badgeColor}/70`
+        "inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold",
+        `bg-${badgeColor}/10 text-${badgeColor}`
       )}>
         {formatTransactionCount(count)} transactions
       </div>

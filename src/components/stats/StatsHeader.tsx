@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarIcon } from "lucide-react";
 
 interface StatsHeaderProps {
   firstTransactionDate: Date | null;
@@ -38,17 +37,14 @@ export const StatsHeader = ({
   }
 
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between mb-4">
       <div className="space-y-1">
-        <h2 className="text-2xl font-semibold tracking-tight">Transaction Overview</h2>
-        <div className="flex items-center text-sm text-muted-foreground gap-2">
-          <CalendarIcon className="h-4 w-4" />
-          <span>
-            {format(firstTransactionDate, 'MMMM d, yyyy')} - {format(lastTransactionDate, 'MMMM d, yyyy')}
-          </span>
-        </div>
+        <h2 className="text-2xl font-bold tracking-tight">Transaction Overview</h2>
+        <p className="text-sm text-muted-foreground">
+          From {format(firstTransactionDate, 'MMMM d, yyyy')} to {format(lastTransactionDate, 'MMMM d, yyyy')}
+        </p>
       </div>
-      <Button variant="outline" onClick={handleViewAll} size="sm">
+      <Button variant="outline" onClick={handleViewAll}>
         View All
       </Button>
     </div>
