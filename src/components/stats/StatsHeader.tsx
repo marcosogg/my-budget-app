@@ -7,12 +7,16 @@ interface StatsHeaderProps {
   isLoading?: boolean;
 }
 
-export const StatsHeader = ({ firstTransactionDate, lastTransactionDate, isLoading = false }: StatsHeaderProps) => {
+export const StatsHeader = ({ 
+  firstTransactionDate, 
+  lastTransactionDate,
+  isLoading = false 
+}: StatsHeaderProps) => {
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-48" />
-        <Skeleton className="h-4 w-96" />
+      <div className="space-y-1">
+        <Skeleton className="h-7 w-[300px]" />
+        <Skeleton className="h-5 w-[200px]" />
       </div>
     );
   }
@@ -22,11 +26,10 @@ export const StatsHeader = ({ firstTransactionDate, lastTransactionDate, isLoadi
   }
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-2xl font-bold tracking-tight">Statistics</h2>
-      <p className="text-muted-foreground">
-        Showing data from {format(firstTransactionDate, 'PPP')} to{' '}
-        {format(lastTransactionDate, 'PPP')}
+    <div className="space-y-1">
+      <h2 className="text-2xl font-bold tracking-tight">Transaction Overview</h2>
+      <p className="text-sm text-muted-foreground">
+        From {format(firstTransactionDate, 'MMMM d, yyyy')} to {format(lastTransactionDate, 'MMMM d, yyyy')}
       </p>
     </div>
   );

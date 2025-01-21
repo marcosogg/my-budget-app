@@ -1,57 +1,64 @@
+import { useMemo } from 'react';
 import { Transaction } from '@/types/transaction';
 import { Category } from '@/types/categorization';
 
-interface TransactionStat {
-  amount: number;
-  count: number;
-}
-
 interface TransactionStats {
-  cardPayments: TransactionStat;
-  savingsTotal: TransactionStat;
-  creditCardRepayments: TransactionStat;
+  cardPayments: {
+    amount: number;
+    count: number;
+  };
+  savingsTotal: {
+    amount: number;
+    count: number;
+  };
+  creditCardRepayments: {
+    amount: number;
+    count: number;
+  };
 }
 
-export const useTransactionStats = (transactions: Transaction[], categories: Category[] = []) => {
-  const stats: TransactionStats = {
-    cardPayments: { amount: 0, count: 0 },
-    savingsTotal: { amount: 0, count: 0 },
-    creditCardRepayments: { amount: 0, count: 0 },
-  };
+export const useTransactionStats = (
+  transactions: Transaction[],
+  categories: Category[] = []
+) => {
+  const stats = useMemo(() => {
+    const initialStats: TransactionStats = {
+      cardPayments: { amount: 0, count: 0 },
+      savingsTotal: { amount: 0, count: 0 },
+      creditCardRepayments: { amount: 0, count: 0 },
+    };
 
-  let firstTransactionDate: Date | null = null;
-  let lastTransactionDate: Date | null = null;
-
-  transactions.forEach((transaction) => {
-    if (transaction.completed_date) {
-      const date = new Date(transaction.completed_date);
-      
-      if (!firstTransactionDate || date < firstTransactionDate) {
-        firstTransactionDate = date;
-      }
-      if (!lastTransactionDate || date > lastTransactionDate) {
-        lastTransactionDate = date;
-      }
-
+    return transactions.reduce((acc, transaction) => {
       if (transaction.type === 'CARD_PAYMENT') {
-        stats.cardPayments.amount += Math.abs(transaction.amount);
-        stats.cardPayments.count++;
+        acc.cardPayments.amount += transaction.amount;
+        acc.cardPayments.count += 1;
       } else if (transaction.product === 'Savings') {
-        stats.savingsTotal.amount += Math.abs(transaction.amount);
-        stats.savingsTotal.count++;
+        acc.savingsTotal.amount += transaction.amount;
+        acc.savingsTotal.count += 1;
       } else if (
         transaction.type === 'TRANSFER' &&
         transaction.description?.toLowerCase().includes('credit card repayment')
       ) {
-        stats.creditCardRepayments.amount += Math.abs(transaction.amount);
-        stats.creditCardRepayments.count++;
+        acc.creditCardRepayments.amount += transaction.amount;
+        acc.creditCardRepayments.count += 1;
       }
-    }
-  });
+      return acc;
+    }, initialStats);
+  }, [transactions]);
+
+  const dates = useMemo(() => {
+    const dates = transactions
+      .map(t => t.completed_date ? new Date(t.completed_date) : null)
+      .filter((date): date is Date => date !== null);
+
+    return {
+      firstTransactionDate: dates.length ? new Date(Math.min(...dates.map(d => d.getTime()))) : null,
+      lastTransactionDate: dates.length ? new Date(Math.max(...dates.map(d => d.getTime()))) : null,
+    };
+  }, [transactions]);
 
   return {
     stats,
-    firstTransactionDate,
-    lastTransactionDate,
+    ...dates,
   };
 };
