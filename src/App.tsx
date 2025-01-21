@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { createContext, useContext, useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -25,6 +25,28 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({ isAuthenticated: false, isLoading: true });
 
 export const useAuth = () => useContext(AuthContext);
+
+// Title mapping for routes
+const routeTitles: Record<string, string> = {
+  "/": "Dashboard | My Budget App",
+  "/login": "Login | My Budget App",
+  "/transactions": "Transactions | My Budget App",
+  "/upload": "Upload | My Budget App",
+  "/analytics/categories": "Categories | My Budget App",
+  "/mappings": "Mappings | My Budget App",
+  "/reminders": "Reminders | My Budget App",
+};
+
+function TitleUpdater() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const title = routeTitles[location.pathname] || "My Budget App";
+    document.title = title;
+  }, [location]);
+
+  return null;
+}
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -71,6 +93,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <TitleUpdater />
             <SidebarProvider>
               <div className="min-h-screen flex w-full">
                 {authState.isAuthenticated && !authState.isLoading && <AppSidebar />}

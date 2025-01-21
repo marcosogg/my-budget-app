@@ -6,6 +6,7 @@ import {
   SidebarMenuButton
 } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { SettingsDropdown } from "@/components/SettingsDropdown";
 import { Link } from "react-router-dom";
 
 export function AppSidebar() {
@@ -33,17 +34,19 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/mappings" className="flex items-center gap-2">Mappings</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
               <Link to="/analytics/categories" className="flex items-center gap-2">Categories</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link to="/reminders" className="flex items-center gap-2">Reminders</Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <div className="flex items-center gap-2">
+                <SettingsDropdown />
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
