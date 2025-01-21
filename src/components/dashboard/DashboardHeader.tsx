@@ -2,47 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from "@/App";
-import { useToast } from "@/components/ui/use-toast";
 
 export const DashboardHeader = () => {
   const navigate = useNavigate();
-  const authState = useAuth();
-  const { toast } = useToast();
-
-  console.log("DashboardHeader - Current auth state:", authState);
 
   const handleLogout = async () => {
-    console.log("Logout button clicked");
-    try {
-      console.log("Starting logout process");
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        // If we get a 403/session_not_found, the session is already invalid
-        if (error.status === 403 && error.message.includes('session_not_found')) {
-          console.log("Session already invalid, proceeding with navigation");
-          navigate('/login');
-          return;
-        }
-        
-        throw error;
-      }
-
-      console.log("Logout successful");
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account.",
-      });
-      navigate('/login');
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast({
-        title: "Logout failed",
-        description: "Please try again. If the problem persists, try refreshing the page.",
-        variant: "destructive",
-      });
-    }
+    await supabase.auth.signOut();
+    navigate('/login');
   };
 
   return (
