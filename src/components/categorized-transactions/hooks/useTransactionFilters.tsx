@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { CategorizedTransactionData, TransactionFilters, isExpenseTransaction } from '@/shared/types/transactions.d.ts';
+import { CategorizedTransactionData, TransactionFilters, isExpenseTransaction } from '@/shared/types/transactions';
 
 export const useTransactionFilters = (transactions: CategorizedTransactionData[]) => {
   const [filters, setFilters] = useState<TransactionFilters>({
@@ -18,13 +18,13 @@ export const useTransactionFilters = (transactions: CategorizedTransactionData[]
 
     if (filters.category) {
       filtered = filtered.filter(transaction =>
-        transaction.categories.name.toLowerCase().includes(filters.category.toLowerCase())
+        transaction.categories.name.toLowerCase().includes(filters.category?.toLowerCase() || '')
       );
     }
 
     if (filters.description) {
       filtered = filtered.filter(transaction =>
-        transaction.transactions.description?.toLowerCase().includes(filters.description.toLowerCase())
+        transaction.transactions.description?.toLowerCase().includes(filters.description?.toLowerCase() || '')
       );
     }
 

@@ -1,6 +1,4 @@
 import { Category } from '@/types/categorization';
-import { Transaction } from '@/types/transaction';
-import { CategorizedTransaction } from '@/types/categorization';
 
 export interface BaseTransaction {
   id: string;
@@ -18,18 +16,18 @@ export interface BaseTransaction {
   created_at: string;
 }
 
-export interface CategorizedTransactionData extends CategorizedTransaction {
-  transactions: Transaction;
+export interface CategorizedTransactionData extends BaseTransaction {
   categories: Category;
+  transactions: BaseTransaction;
 }
 
 export interface TransactionFilters {
-  category: string; // Made required
-  description: string; // Made required
-  date: Date | undefined;
-  expensesOnly: boolean; // Made required
   type?: string;
   product?: string;
+  description?: string;
+  date?: Date;
+  expensesOnly?: boolean;
+  category?: string;
 }
 
 // Type guard for categorized transactions
