@@ -13,6 +13,7 @@ import Mappings from "./pages/Mappings";
 import Reminders from "./pages/Reminders";
 import { supabase } from "./integrations/supabase/client";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,17 @@ function TitleUpdater() {
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Session expired",
+        description: "Please log in again to continue.",
+        variant: "destructive",
+      });
+    }
+  }, [isAuthenticated, isLoading, toast]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -68,21 +80,57 @@ const App = () => {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check for existing session
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          setAuthState({
+            isAuthenticated: false,
+            isLoading: false,
+          });
+          return;
+        }
+
+        setAuthState({
+          isAuthenticated: !!session,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Session check error:", error);
+        setAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      }
+
+      if (event === 'SIGNED_OUT') {
+        // Clear any stored session data
+        await supabase.auth.signOut();
+      }
+
       setAuthState({
         isAuthenticated: !!session,
         isLoading: false,
       });
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthState({
-        isAuthenticated: !!session,
-        isLoading: false,
-      });
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
