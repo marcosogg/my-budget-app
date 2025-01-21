@@ -4,7 +4,7 @@ import { TransactionFilters } from '@/shared/types/transactions';
 export const useTransactionFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filters: TransactionFilters = {
+  const filters: Partial<TransactionFilters> = {
     type: searchParams.get('type') || undefined,
     product: searchParams.get('product') || undefined,
     description: searchParams.get('description') || undefined,

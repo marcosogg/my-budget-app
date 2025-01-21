@@ -18,13 +18,13 @@ export const useTransactionFilters = (transactions: CategorizedTransactionData[]
 
     if (filters.category) {
       filtered = filtered.filter(transaction =>
-        transaction.categories.name.toLowerCase().includes(filters.category?.toLowerCase() || '')
+        transaction.categories.name.toLowerCase().includes(filters.category.toLowerCase())
       );
     }
 
     if (filters.description) {
       filtered = filtered.filter(transaction =>
-        transaction.transactions.description?.toLowerCase().includes(filters.description?.toLowerCase() || '')
+        transaction.transactions.description?.toLowerCase().includes(filters.description.toLowerCase())
       );
     }
 
