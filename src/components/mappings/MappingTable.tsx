@@ -58,47 +58,9 @@ export function MappingTable({
     setEditValues(null);
   };
 
-  const handleSave = async (mapping: Mapping) => {
-    if (!editValues) return;
-    
-    if (!editValues.description.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Description cannot be empty",
-      });
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await onEdit({
-        ...mapping,
-        description: editValues.description,
-        category_id: editValues.category_id,
-      });
-      setEditingId(null);
-      setEditValues(null);
-      toast({
-        title: "Success",
-        description: "Mapping updated successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update mapping",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent, mapping: Mapping) => {
     if (e.key === 'Escape') {
       handleCancelEdit();
-    } else if (e.key === 'Enter' && !e.shiftKey) {
-      handleSave(mapping);
     }
   };
 
@@ -132,7 +94,6 @@ export function MappingTable({
               categories={categories || []}
               isSaving={isSaving}
               inputRef={inputRef}
-              onSave={() => handleSave(mapping)}
               onCancel={handleCancelEdit}
               onEditValuesChange={setEditValues}
               onKeyDown={(e) => handleKeyDown(e, mapping)}
